@@ -1,0 +1,439 @@
+/* ============================================================
+   MAPLE — EDITORIAL BENTO DESIGN SYSTEM
+   Instrument Serif · Space Grotesk · Fraunces · IBM Plex Mono
+   Dark cinematic maple-leaf palette
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@300;400;500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,400;1,9..144,400&family=IBM+Plex+Mono:wght@300;400;500&display=swap');
+
+/* ── Maple leaf palette — dark cinematic ── */
+:root {
+  --bg-0:      #0a0604;
+  --bg-1:      #130907;
+  --bg-2:      #1b0e0a;
+  --bg-3:      #24140f;
+  --bg-4:      #2e1a13;
+
+  --leaf-flame:    #ff5a1f;
+  --leaf-scarlet:  #e8281e;
+  --leaf-crimson:  #a5120f;
+  --leaf-amber:    #f4a433;
+  --leaf-rust:     #b5491a;
+  --leaf-wine:     #5a0d0a;
+  --leaf-ember:    #ff7a3a;
+
+  --ink-100:   #fef4e6;
+  --ink-80:    #e8d4b8;
+  --ink-60:    #a89179;
+  --ink-40:    #6a5445;
+  --ink-30:    #4a382d;
+  --ink-20:    #2e2119;
+
+  --line:       #331d14;
+  --line-soft:  #241308;
+  --line-bright:#4a2a18;
+
+  --grad-maple:     linear-gradient(135deg, #ff5a1f 0%, #e8281e 40%, #a5120f 100%);
+  --grad-maple-v:   linear-gradient(180deg, #f4a433 0%, #ff5a1f 50%, #a5120f 100%);
+  --grad-ember:     linear-gradient(135deg, #ff7a3a 0%, #b5491a 100%);
+  --grad-dawn:      linear-gradient(145deg, #24140f 0%, #3a1c10 50%, #1b0e0a 100%);
+  --grad-dusk:      linear-gradient(145deg, #1b0e0a 0%, #2a1008 50%, #0a0604 100%);
+  --grad-glow:      radial-gradient(circle at 50% 0%, rgba(255,90,31,0.18) 0%, transparent 60%);
+  --grad-ember-soft: radial-gradient(circle at 30% 30%, rgba(255,122,58,0.12), transparent 65%);
+
+  --shadow-1: 0 1px 0 rgba(255,122,58,0.04) inset, 0 2px 8px rgba(0,0,0,0.4);
+  --shadow-2: 0 1px 0 rgba(255,122,58,0.06) inset, 0 8px 24px rgba(0,0,0,0.55), 0 2px 6px rgba(0,0,0,0.4);
+  --shadow-3: 0 1px 0 rgba(255,122,58,0.08) inset, 0 18px 48px rgba(0,0,0,0.65), 0 4px 12px rgba(0,0,0,0.5);
+  --shadow-glow: 0 0 0 1px rgba(255,90,31,0.25), 0 0 32px rgba(255,90,31,0.18), 0 12px 40px rgba(0,0,0,0.6);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+html, body {
+  background: var(--bg-1);
+  color: var(--ink-100);
+  font-family: 'Space Grotesk', sans-serif;
+  min-height: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  background-image:
+    radial-gradient(ellipse at 20% 0%, rgba(255,90,31,0.08), transparent 50%),
+    radial-gradient(ellipse at 80% 100%, rgba(232,40,30,0.06), transparent 55%),
+    radial-gradient(ellipse at 50% 50%, rgba(244,164,51,0.03), transparent 60%);
+  background-attachment: fixed;
+}
+
+/* Subtle scan-line texture */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  pointer-events: none;
+  background-image:
+    repeating-linear-gradient(0deg, transparent 0, transparent 2px, rgba(255,255,255,0.008) 2px, rgba(255,255,255,0.008) 3px);
+  z-index: 1;
+}
+
+.page { position: relative; z-index: 2; }
+
+a       { color: inherit; text-decoration: none; cursor: none; }
+button  { cursor: none; border: none; background: none; font-family: inherit; }
+input, textarea { font-family: inherit; cursor: none; }
+select  { cursor: none; }
+img     { display: block; }
+
+/* Scrollbar */
+::-webkit-scrollbar       { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(200, 90, 40, 0.30); border-radius: 99px; }
+
+/* Utility */
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
+.hidden  { display: none !important; }
+.w-full  { width: 100%; }
+
+/* ── Page container ── */
+.page {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 28px 36px 72px;
+  position: relative;
+  z-index: 2;
+}
+
+/* ── Masthead ── */
+.masthead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 22px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 40px;
+}
+
+.brand { display: flex; align-items: center; gap: 14px; }
+
+.brand-mark {
+  width: 34px; height: 34px;
+  position: relative;
+  filter: drop-shadow(0 2px 8px rgba(255,90,31,0.4));
+}
+
+.brand-name {
+  font-family: 'Instrument Serif', serif;
+  font-weight: 400;
+  font-size: 32px;
+  letter-spacing: 0.03em;
+  line-height: 1;
+  background: var(--grad-maple-v);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.brand-sub {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--ink-60);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  margin-left: 4px;
+}
+
+.nav {
+  display: flex; gap: 30px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 500;
+  font-size: 11px;
+  color: var(--ink-60);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.nav-item {
+  cursor: none;
+  padding-bottom: 5px;
+  border-bottom: 1px solid transparent;
+  transition: color 0.2s, border-color 0.2s;
+  position: relative;
+}
+.nav-item:hover { color: var(--ink-100); }
+.nav-item.active {
+  color: var(--leaf-flame);
+  border-color: var(--leaf-flame);
+}
+
+.nav-dot {
+  display: inline-block;
+  width: 3px; height: 3px;
+  border-radius: 50%;
+  background: var(--ink-40);
+  align-self: center;
+}
+
+.account {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  background: var(--grad-maple);
+  color: var(--bg-1);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px; font-weight: 700;
+  cursor: none;
+  box-shadow: 0 4px 14px rgba(255,90,31,0.3), inset 0 1px 0 rgba(255,255,255,0.25);
+}
+
+/* ── Lede (Hero headline) ── */
+.lede {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+  margin-bottom: 44px;
+  position: relative;
+  text-align: center;
+}
+
+.lede-headline {
+  font-family: 'Fraunces', serif;
+  font-weight: 400;
+  font-size: 116px;
+  line-height: 0.9;
+  letter-spacing: -0.035em;
+  color: var(--ink-100);
+  font-variation-settings: "opsz" 144, "SOFT" 100;
+  text-align: center;
+  /* a tiny, deliberate tilt — like a sketch pinned slightly off */
+  transform: rotate(-0.4deg);
+}
+.lede-headline em {
+  font-style: italic;
+  background: var(--grad-maple-v);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-variation-settings: "opsz" 144, "SOFT" 100;
+  display: inline-block;
+  transform: rotate(0.8deg);
+}
+.lede-headline .small {
+  display: block;
+  font-family: 'Instrument Serif', serif;
+  font-size: 42px;
+  color: var(--ink-60);
+  margin-top: 6px;
+  font-style: italic;
+  letter-spacing: -0.01em;
+  transform: rotate(0.3deg);
+}
+
+.lede-meta {
+  text-align: center;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--ink-60);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  line-height: 1.8;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 14px;
+  max-width: 640px;
+}
+.lede-meta-strong { color: var(--leaf-amber); }
+
+/* ── Bento Grid ── */
+.bento {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  grid-auto-rows: 110px;
+  gap: 14px;
+  position: relative;
+}
+
+.tile {
+  background: var(--grad-dawn);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+  cursor: none;
+  transition: transform 0.35s cubic-bezier(.34,1.2,.64,1),
+              box-shadow 0.35s, border-color 0.3s, background 0.3s;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-1);
+}
+.tile::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 8%; right: 8%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,170,100,0.18), transparent);
+  pointer-events: none;
+}
+.tile::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--grad-ember-soft);
+  opacity: 0.6;
+}
+.tile > * { position: relative; z-index: 1; }
+.tile:hover {
+  border-color: var(--line-bright);
+  background: linear-gradient(145deg, #2e1a13 0%, #3a1c10 55%, #1f0e09 100%);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-3);
+}
+
+.tile-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-60);
+  display: flex; align-items: center; gap: 10px;
+}
+.tile-label .idx {
+  width: 20px; height: 20px;
+  border: 1px solid var(--line-bright);
+  border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 9px;
+  color: var(--leaf-amber);
+  background: var(--bg-2);
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.5);
+}
+
+/* Grid span utilities */
+.s-2{grid-column:span 2}.s-3{grid-column:span 3}.s-4{grid-column:span 4}
+.s-5{grid-column:span 5}.s-6{grid-column:span 6}.s-7{grid-column:span 7}
+.s-8{grid-column:span 8}.s-12{grid-column:span 12}
+.r-2{grid-row:span 2}.r-3{grid-row:span 3}.r-4{grid-row:span 4}
+
+/* ── Section title ── */
+.section-title {
+  font-family: 'Fraunces', serif;
+  font-variation-settings: "opsz" 72;
+  font-size: 1.5rem;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  color: var(--ink-100);
+  margin-bottom: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  text-align: center;
+  /* a slightly wobbly hand-drawn underline */
+  position: relative;
+}
+.section-title::after {
+  content: '';
+  display: block;
+  width: 56px; height: 6px;
+  background: var(--grad-maple);
+  border-radius: 50%;
+  /* off-center on purpose — feels drawn, not stamped */
+  margin-left: 8px;
+  opacity: 0.85;
+  transform: rotate(-1.2deg);
+  filter: blur(0.3px);
+}
+
+/* ── Toast ── */
+#toast-container {
+  position: fixed;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.toast {
+  background: var(--grad-maple);
+  color: var(--ink-100);
+  padding: 10px 20px;
+  border-radius: 999px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 500;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  z-index: 5000;
+  animation: toastIn 0.3s cubic-bezier(.34,1.56,.64,1), toastOut 0.3s ease 2.2s forwards;
+  display: flex; align-items: center; gap: 10px;
+  box-shadow: 0 10px 40px rgba(255,90,31,0.4), inset 0 1px 0 rgba(255,255,255,0.2);
+}
+.toast.error {
+  background: linear-gradient(135deg, #c42a2a, #8a0f14);
+}
+
+@keyframes toastIn {
+  from { transform: translateX(-50%) translateY(-20px); opacity: 0; }
+  to   { transform: translateX(-50%) translateY(0); opacity: 1; }
+}
+@keyframes toastOut {
+  from { opacity: 1; }
+  to   { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+}
+
+/* ── Footer ── */
+.footer {
+  margin-top: 56px;
+  padding-top: 22px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--ink-60);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.footer .key {
+  border: 1px solid var(--line-bright);
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--bg-3);
+  color: var(--ink-80);
+}
+.footer .live-dot { color: var(--leaf-flame); }
+
+/* ── Responsive ── */
+@media (max-width: 1080px) {
+  .lede-headline { font-size: 84px; }
+  .lede-headline .small { font-size: 36px; }
+  .page { padding: 20px 24px 56px; }
+}
+
+@media (max-width: 768px) {
+  .lede-headline { font-size: 56px; }
+  .lede-headline .small { font-size: 28px; }
+  .lede { gap: 18px; }
+  .lede-meta { text-align: center; gap: 10px; }
+  .masthead { flex-wrap: wrap; gap: 16px; }
+  .nav { gap: 16px; font-size: 10px; }
+  .bento { grid-template-columns: repeat(6, 1fr); grid-auto-rows: 100px; gap: 10px; }
+  .s-8 { grid-column: span 6; }
+  .s-12 { grid-column: span 6; }
+  .footer { flex-direction: column; gap: 12px; text-align: center; }
+}
+
+@media (max-width: 480px) {
+  .bento { grid-template-columns: repeat(4, 1fr); grid-auto-rows: 90px; }
+  .s-3, .s-4, .s-5, .s-6, .s-7, .s-8 { grid-column: span 4; }
+  .s-2 { grid-column: span 2; }
+  .s-12 { grid-column: span 4; }
+}

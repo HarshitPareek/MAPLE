@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Maple — Watchlist{% endblock %}
+{% block content %}
+<div class="page-fade-in" style="padding:2rem;max-width:1400px;margin:0 auto;">
+  <div id="watchlist-guard" class="hidden" style="text-align:center;padding:4rem;color:var(--ink-60);">
+    <p style="font-size:1.1rem;margin-bottom:1rem;">Sign in to view your watchlist</p>
+    <a href="/auth" class="btn btn-primary">Sign In</a>
+  </div>
+
+  <div id="watchlist-content">
+    <div style="margin-bottom:2rem;">
+      <h1 style="font-size:2rem;font-weight:800;letter-spacing:-0.03em;">Watchlist</h1>
+      <p style="color:var(--ink-60);margin-top:0.3rem;">Movies & shows you want to watch</p>
+    </div>
+
+    <div id="watchlist-list">
+      <div class="spinner"></div>
+    </div>
+    <p id="watchlist-empty" class="hidden" style="color:var(--ink-60);padding:1rem 0;">
+      Your watchlist is empty. Browse movies and add some!
+    </p>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  async function fetchDetails(entries) {
+    const results = await Promise.all(
+      entries.slice(0, 50).map(({ id, type }) =>
+        API.get(`/api/movies/${id}?type=${type}`).then(d => d.movie).catch(() => null)
+      )
+    );
+    return results.filter(Boolean);
+  }
+
+  function interleave(movieIds, tvIds) {
+    const entries = [];
+    const mLen = movieIds.length, tLen = tvIds.length;
+    for (let i = 0; i < Math.max(mLen, tLen); i++) {
+      if (i < mLen) entries.push({ id: movieIds[i], type: 'movie' });
+      if (i < tLen) entries.push({ id: tvIds[i],    type: 'tv' });
+    }
+    return entries;
+  }
+
+  async function loadWatchlist() {
+    if (!Auth.isLoggedIn()) {
+      document.getElementById('watchlist-content').classList.add('hidden');
+      document.getElementById('watchlist-guard').classList.remove('hidden');
+      return;
+    }
+
+    const wlData = await API.get('/api/user/watchlist').catch(() => ({ movie_ids: [], tv_ids: [] }));
+    const entries = interleave(wlData.movie_ids || [], wlData.tv_ids || []);
+
+    if (entries.length === 0) {
+      document.getElementById('watchlist-list').innerHTML = '';
+      document.getElementById('watchlist-empty').classList.remove('hidden');
+    } else {
+      const movies = await fetchDetails(entries);
+      renderListView(movies, document.getElementById('watchlist-list'));
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', loadWatchlist);
+</script>
+{% endblock %}

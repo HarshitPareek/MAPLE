@@ -1,0 +1,694 @@
+{% extends "base.html" %}
+{% block title %}Maple — Discover{% endblock %}
+{% block content %}
+
+<!-- Lede hero -->
+<section class="lede page-fade-in">
+  <h1 class="lede-headline">
+    What to watch,<br><em>tonight.</em>
+    <span class="small" id="lede-sub">Curated for you.</span>
+  </h1>
+  <div class="lede-meta">
+    <div class="lede-meta-strong">ISSUE №247</div>
+    <div id="lede-date"></div>
+    <div>— — —</div>
+    <div>9,200 titles indexed</div>
+    <div>updated continuously</div>
+  </div>
+</section>
+
+<!-- Bento grid -->
+<section class="bento" id="bento-grid">
+
+  <!-- Featured tile (populated by JS) -->
+  <div class="tile featured s-12 r-4" id="featured-tile" style="display:none;">
+    <div class="featured-leaf" id="featured-leaf"></div>
+    <div style="display:flex;flex-direction:column;z-index:1;">
+      <div class="featured-label" id="featured-label"></div>
+      <div class="featured-title" id="featured-title"></div>
+      <div class="featured-meta" id="featured-meta"></div>
+    </div>
+    <div class="featured-right">
+      <div class="featured-quote" id="featured-quote"></div>
+      <div class="featured-footer">
+        <button class="featured-btn" id="featured-btn">
+          <span>Watch tonight</span>
+          <span class="arrow-circle">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4">
+              <path d="M3 8h10M9 4l4 4-4 4" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+        </button>
+        <div class="featured-idx" id="featured-idx"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search tile -->
+  <div class="tile search-tile s-8 r-2">
+    <div class="tile-label"><span class="idx">01</span><span>Find it</span></div>
+    <input class="search-line" id="search-input" placeholder="A film you half-remember…" autocomplete="off">
+    <div class="search-hint">
+      <span><span class="search-key">⌘</span> <span class="search-key">K</span> quick open</span>
+      <span>search by <em>title · mood · line of dialogue</em></span>
+    </div>
+    <div class="ac-dropdown" id="ac-dropdown"></div>
+  </div>
+
+  <!-- Mood tile -->
+  <div class="tile s-4 r-2">
+    <div class="tile-label"><span class="idx">02</span><span>Mood · Tonight</span></div>
+    <div class="mood-row" id="mood-row">
+      <button class="mood-chip" data-mood="a quiet ache">a quiet ache</button>
+      <button class="mood-chip" data-mood="luminous">luminous</button>
+      <button class="mood-chip" data-mood="patient">patient</button>
+      <button class="mood-chip" data-mood="disorienting">disorienting</button>
+      <button class="mood-chip" data-mood="funny · sad">funny · sad</button>
+      <button class="mood-chip" data-mood="formally strange">formally strange</button>
+      <button class="mood-chip" data-mood="a chase">a chase</button>
+      <button class="mood-chip" data-mood="a mystery">a mystery</button>
+      <button class="mood-chip" data-mood="tender">tender</button>
+    </div>
+  </div>
+
+  <!-- Film card tiles (populated by JS from top-rated) -->
+  <div class="tile film-card s-4 r-3" id="film-tile-1" style="display:none;">
+    <div class="film-cover"><div class="film-cover-meta"></div><div class="film-cover-rating"></div><div class="film-cover-title"></div></div>
+    <div class="film-info"><div class="film-info-meta"></div><div class="film-info-meta"></div></div>
+  </div>
+  <div class="tile film-card s-4 r-3" id="film-tile-2" style="display:none;">
+    <div class="film-cover"><div class="film-cover-meta"></div><div class="film-cover-rating"></div><div class="film-cover-title"></div></div>
+    <div class="film-info"><div class="film-info-meta"></div><div class="film-info-meta"></div></div>
+  </div>
+
+  <!-- Surprise tile -->
+  <div class="tile surprise-tile s-4 r-3" id="surprise-tile" style="display:none;">
+    <div class="tile-label"><span class="idx">04</span><span>Serendipity</span></div>
+    <div class="surprise-head">Surprise <em>me.</em></div>
+    <div class="surprise-footer">
+      <div class="surprise-sub">One film, pulled from just outside your taste.</div>
+      <button class="arrow-btn" id="surprise-btn">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4">
+          <path d="M3 8h10M9 4l4 4-4 4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Taste DNA tile (logged-in only) -->
+  <div class="tile s-4 r-3" id="dna-tile" style="display:none;">
+    <div class="tile-label"><span class="idx">03</span><span>Your Taste DNA</span></div>
+    <div class="dna-sub" id="dna-sub">based on your rated films</div>
+    <div class="dna-title" id="dna-title"></div>
+    <div class="dna-bars" id="dna-bars"></div>
+  </div>
+
+  <!-- Twins tile (decorative) -->
+  <div class="tile s-4 r-2" id="twins-tile" style="display:none;">
+    <div class="tile-label"><span class="idx">05</span><span>Taste Twins</span></div>
+    <div style="margin-top:10px;flex:1;" id="twins-list"></div>
+  </div>
+
+  <!-- Stats tile (logged-in only) -->
+  <div class="tile s-4 r-2" id="stat-tile" style="display:none;">
+    <div class="tile-label"><span class="idx">★</span><span>Log</span></div>
+    <div class="stat-number"><em id="stat-count">0</em></div>
+    <div class="stat-caption" id="stat-caption">films watched</div>
+  </div>
+
+  <!-- Queue tile (watchlist, logged-in only) -->
+  <div class="tile s-4 r-2" id="queue-tile" style="display:none;">
+    <div class="tile-label"><span class="idx">06</span><span>Up Next · Queue</span></div>
+    <div style="margin-top:12px;flex:1;" id="queue-list"></div>
+  </div>
+
+  <!-- Additional film cards row -->
+  <div class="tile film-card s-4 r-3" id="film-tile-3" style="display:none;">
+    <div class="film-cover"><div class="film-cover-meta"></div><div class="film-cover-rating"></div><div class="film-cover-title"></div></div>
+    <div class="film-info"><div class="film-info-meta"></div><div class="film-info-meta"></div></div>
+  </div>
+  <div class="tile film-card s-4 r-3" id="film-tile-4" style="display:none;">
+    <div class="film-cover"><div class="film-cover-meta"></div><div class="film-cover-rating"></div><div class="film-cover-title"></div></div>
+    <div class="film-info"><div class="film-info-meta"></div><div class="film-info-meta"></div></div>
+  </div>
+  <div class="tile film-card s-4 r-3" id="film-tile-5" style="display:none;">
+    <div class="film-cover"><div class="film-cover-meta"></div><div class="film-cover-rating"></div><div class="film-cover-title"></div></div>
+    <div class="film-info"><div class="film-info-meta"></div><div class="film-info-meta"></div></div>
+  </div>
+
+  <!-- Ticker -->
+  <div class="tile ticker-tile s-12" id="ticker-tile" style="display:none;height:72px;">
+    <div class="ticker-label">Just added</div>
+    <div class="ticker-strip">
+      <div class="ticker-content" id="ticker-content"></div>
+    </div>
+  </div>
+
+</section>
+
+<!-- Search results — hidden by default -->
+<section id="search-results-section" style="display:none;margin-top:2rem;">
+  <h2 class="section-title" id="search-title">Results</h2>
+  <div class="movies-grid" id="search-grid"></div>
+</section>
+
+<!-- Browse grid (genre-filtered / paginated) -->
+<section id="browse-section" style="margin-top:2.5rem;">
+  <h2 class="section-title" id="grid-title">All</h2>
+
+  <!-- Content type tabs -->
+  <div style="display:flex;justify-content:center;gap:0.45rem;margin-bottom:1rem;">
+    <button class="type-tab active" data-type="">All</button>
+    <button class="type-tab" data-type="movie">Movies</button>
+    <button class="type-tab" data-type="tv">TV Shows</button>
+  </div>
+
+  <!-- Genre filter -->
+  <div class="genre-bar" id="genre-bar" style="display:flex;flex-wrap:wrap;justify-content:center;gap:0.4rem;margin-bottom:1.25rem;">
+    <button class="genre-chip active" data-genre="">All Genres</button>
+  </div>
+
+  <div class="movies-grid" id="movies-grid"></div>
+  <div style="display:flex;justify-content:center;gap:1rem;margin-top:2.5rem;" id="pagination"></div>
+</section>
+
+<style>
+  .type-tab {
+    padding: 0.4rem 1rem;
+    border-radius: 99px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    font-family: 'Space Grotesk', sans-serif;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border: 1px solid var(--line);
+    background: var(--bg-2);
+    color: var(--ink-60);
+    cursor: none;
+    transition: all 0.2s;
+  }
+  .type-tab.active {
+    background: rgba(255,90,31,0.18);
+    border-color: rgba(255,90,31,0.4);
+    color: var(--leaf-amber);
+  }
+  .type-tab:hover {
+    border-color: var(--line-bright);
+    color: var(--ink-80);
+  }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/recommendations.js"></script>
+<script>
+  let currentPage = 1;
+  let currentGenre = '';
+  let currentType  = '';
+  let currentMood  = null;
+
+  // Set lede date
+  const today = new Date();
+  const dateStr = today.toLocaleDateString('en-US', { day:'2-digit', month:'short', year:'numeric' }).toUpperCase();
+  document.getElementById('lede-date').textContent = dateStr;
+  document.getElementById('lede-sub').textContent =
+    `Curated for you · at ${today.getHours()%12||12}:${String(today.getMinutes()).padStart(2,'0')}${today.getHours()>=12?'pm':'am'}.`;
+
+  // ---- Populate featured tile from top-rated ----
+  function populateFeatured(movie) {
+    const tile = document.getElementById('featured-tile');
+    if (!tile || !movie) return;
+
+    // Leaf watermark
+    const leaf = document.getElementById('featured-leaf');
+    leaf.innerHTML = `<svg width="340" height="340" viewBox="0 0 64 64" fill="none">
+      <path fill="#ff5a1f" d="M32 8 C 28 8, 26 12, 26 16 C 22 14, 16 14, 13 18 C 10 22, 12 28, 16 30 C 12 32, 9 36, 11 40 C 13 44, 19 44, 23 42 C 22 46, 24 50, 28 50 C 30 49, 31 46, 31 43 L 31 56 L 33 56 L 33 43 C 33 46, 34 49, 36 50 C 40 50, 42 46, 41 42 C 45 44, 51 44, 53 40 C 55 36, 52 32, 48 30 C 52 28, 54 22, 51 18 C 48 14, 42 14, 38 16 C 38 12, 36 8, 32 8 Z"/>
+    </svg>`;
+
+    const dayName = today.toLocaleDateString('en-US', { weekday: 'long' });
+    document.getElementById('featured-label').textContent = `Tonight's Pick · ${dayName}`;
+
+    const titleParts = movie.title.split(':');
+    document.getElementById('featured-title').innerHTML = titleParts[0] +
+      (titleParts.length > 1 ? `<em>: ${titleParts.slice(1).join(':').trim()}</em>` : '');
+
+    const ct = movie.content_type || 'movie';
+    const genres = (movie.genres || '').split(', ').filter(Boolean).slice(0, 3).join(' · ');
+    document.getElementById('featured-meta').innerHTML = `
+      <span>${movie.year || ''}</span><span>·</span>
+      <span>${genres}</span><span>·</span>
+      <span class="star">★ ${movie.rating}</span>
+    `;
+
+    const overview = movie.overview || '';
+    document.getElementById('featured-quote').textContent =
+      overview.length > 140 ? overview.substring(0, 140) + '…' : overview;
+
+    document.getElementById('featured-idx').innerHTML = `<em>01</em> / 06`;
+
+    tile.style.display = '';
+    tile.dataset.movieId = movie.id;
+    tile.dataset.ct = ct;
+
+    tile.addEventListener('click', () => openDetail(movie.id, ct));
+    document.getElementById('featured-btn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      openDetail(movie.id, ct);
+    });
+  }
+
+  // ---- Populate film card tiles ----
+  function populateFilmTile(tileId, movie, idx, label) {
+    const tile = document.getElementById(tileId);
+    if (!tile || !movie) return;
+
+    const ct = movie.content_type || 'movie';
+    const poster = movie.poster || '';
+    const genres = (movie.genres || '').split(', ').filter(Boolean);
+
+    // Set cover gradient colors based on poster or defaults
+    tile.style.setProperty('--cover1', '#1a0a05');
+    tile.style.setProperty('--cover2', '#7a2a0f');
+
+    const cover = tile.querySelector('.film-cover');
+    if (poster) {
+      cover.style.backgroundImage = `linear-gradient(180deg, transparent 30%, rgba(10,6,4,0.85) 100%), url('${poster}')`;
+      cover.style.backgroundSize = 'cover';
+      cover.style.backgroundPosition = 'center';
+    }
+
+    cover.querySelector('.film-cover-meta').textContent = label || genres[0] || '';
+    cover.querySelector('.film-cover-rating').textContent = `★ ${movie.rating}`;
+
+    const titleParts = movie.title.split(':');
+    cover.querySelector('.film-cover-title').innerHTML = titleParts[0] +
+      (titleParts.length > 1 ? `<span style="font-style:italic;display:block;">${titleParts.slice(1).join(':').trim()}</span>` : '');
+
+    const infoMetas = tile.querySelectorAll('.film-info-meta');
+    if (infoMetas[0]) infoMetas[0].innerHTML = `<span class="film-info-strong">${movie.year || ''}</span>`;
+    if (infoMetas[1]) infoMetas[1].textContent = String(idx).padStart(2, '0');
+
+    tile.style.display = '';
+    tile.addEventListener('click', () => openDetail(movie.id, ct));
+  }
+
+  // ---- Populate Taste DNA ----
+  async function loadGenreDNA() {
+    try {
+      const data = await API.get('/api/recommend/genre-stats');
+      if (!data.genres || data.genres.length === 0) return;
+
+      const barsContainer = document.getElementById('dna-bars');
+      barsContainer.innerHTML = data.genres.slice(0, 4).map((g, i) => `
+        <div class="dna-bar">
+          <div class="dna-bar-name">${g.genre}</div>
+          <div class="dna-bar-track">
+            <div class="dna-bar-fill" style="width:0%;animation-delay:${i * 0.1}s;" data-pct="${g.pct}"></div>
+          </div>
+          <div class="dna-bar-pct">${String(g.pct).padStart(2, '0')}%</div>
+        </div>
+      `).join('');
+
+      // Animate bars
+      requestAnimationFrame(() => setTimeout(() => {
+        barsContainer.querySelectorAll('.dna-bar-fill').forEach(el => {
+          el.style.width = (parseFloat(el.dataset.pct) * 2.6) + '%';
+        });
+      }, 80));
+
+      if (data.genres.length >= 2) {
+        document.getElementById('dna-title').innerHTML =
+          `You like <em>${data.genres[0].genre.toLowerCase()}</em>, <em>${data.genres[1].genre.toLowerCase()}</em> things.`;
+      }
+
+      document.getElementById('dna-tile').style.display = '';
+    } catch {}
+  }
+
+  // ---- Populate Ticker from top-rated ----
+  function populateTicker(movies) {
+    if (!movies || movies.length === 0) return;
+    const items = movies.slice(0, 6);
+    const labels = ['JUST ADDED', 'TRENDING', 'HIDDEN GEM', 'NEW THIS WEEK', 'CRITICS\' PICK', 'RECOMMENDED'];
+    // Duplicate for seamless scroll
+    const html = [...items, ...items].map((m, i) => {
+      const note = labels[i % labels.length];
+      return `<span class="ticker-item"><span class="sep">→</span>${m.title} <span class="dim">${note}</span></span>`;
+    }).join('');
+    document.getElementById('ticker-content').innerHTML = html;
+    document.getElementById('ticker-tile').style.display = '';
+  }
+
+  // ---- Twins (decorative, static data) ----
+  function populateTwins() {
+    const twins = [
+      { name: 'Pulkit',  overlap: '87% overlap · 112 films', pct: 87, color: 'linear-gradient(135deg,#ff5a1f,#a5120f)' },
+      { name: 'Meera',   overlap: '74% overlap · 89 films',  pct: 74, color: 'linear-gradient(135deg,#f4a433,#b5491a)' },
+      { name: 'Aryan',   overlap: '71% overlap · 76 films',  pct: 71, color: 'linear-gradient(135deg,#e8281e,#5a0d0a)' },
+    ];
+    const container = document.getElementById('twins-list');
+    container.innerHTML = twins.map(t => `
+      <div class="twin-row">
+        <div class="twin-avatar" style="background:${t.color}">${t.name.slice(0, 2).toUpperCase()}</div>
+        <div>
+          <div class="twin-name">${t.name}</div>
+          <div class="twin-overlap">${t.overlap}</div>
+        </div>
+        <div class="twin-match"><em>${t.pct}</em>%</div>
+      </div>
+    `).join('');
+    document.getElementById('twins-tile').style.display = '';
+  }
+
+  // ---- Queue from watchlist API ----
+  async function loadQueue() {
+    try {
+      const data = await API.get('/api/user/watchlist');
+      const ids = data.movie_ids || [];
+      if (ids.length === 0) return;
+
+      // Fetch details for first 4
+      const movies = [];
+      for (const id of ids.slice(0, 4)) {
+        try {
+          const d = await API.get(`/api/movies/${id}?type=movie`);
+          if (d.movie) movies.push(d.movie);
+        } catch {}
+      }
+      if (movies.length === 0) return;
+
+      const container = document.getElementById('queue-list');
+      container.innerHTML = movies.map((m, i) => `
+        <div class="queue-item" data-id="${m.id}" data-ct="${m.content_type || 'movie'}">
+          <div class="queue-num">${String(i + 1).padStart(2, '0')}</div>
+          <div class="queue-title">${m.title}</div>
+          <div class="queue-meta">${m.year || ''}</div>
+        </div>
+      `).join('');
+      container.querySelectorAll('.queue-item').forEach(item => {
+        item.addEventListener('click', () => openDetail(parseInt(item.dataset.id), item.dataset.ct));
+      });
+      document.getElementById('queue-tile').style.display = '';
+    } catch {}
+  }
+
+  // ---- Surprise Me ----
+  async function rollSurprise() {
+    const btn = document.getElementById('surprise-btn');
+    const tile = document.getElementById('surprise-tile');
+    tile.classList.add('rolling');
+    try {
+      const data = await API.get('/api/recommend/surprise');
+      const m = data.movie;
+      if (!m) { Toast.error('No surprise found'); return; }
+      setTimeout(() => {
+        tile.classList.remove('rolling');
+        openDetail(m.id, m.content_type || 'movie');
+      }, 700);
+    } catch {
+      tile.classList.remove('rolling');
+      Toast.error('Could not load surprise');
+    }
+  }
+
+  // ---- Mood chip selection ----
+  document.getElementById('mood-row').addEventListener('click', e => {
+    const chip = e.target.closest('.mood-chip');
+    if (!chip) return;
+    const mood = chip.dataset.mood;
+    if (currentMood === mood) {
+      currentMood = null;
+      chip.classList.remove('active');
+    } else {
+      document.querySelectorAll('.mood-chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      currentMood = mood;
+      Toast.success(`Filter · ${mood}`);
+    }
+  });
+
+  // ---- Genre loading ----
+  async function loadGenres() {
+    const url  = '/api/movies/genres' + (currentType ? `?type=${currentType}` : '');
+    const data = await API.get(url);
+    const bar  = document.getElementById('genre-bar');
+    bar.innerHTML = '<button class="genre-chip active" data-genre="">All Genres</button>';
+    data.genres.slice(0, 22).forEach(g => {
+      const chip = document.createElement('button');
+      chip.className   = 'genre-chip';
+      chip.textContent = g;
+      chip.dataset.genre = g;
+      bar.appendChild(chip);
+    });
+    bar.querySelectorAll('.genre-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        bar.querySelectorAll('.genre-chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        currentGenre = chip.dataset.genre;
+        currentPage  = 1;
+        loadMovies();
+      });
+    });
+  }
+
+  // ---- Browse grid ----
+  async function loadMovies() {
+    const grid = document.getElementById('movies-grid');
+    grid.innerHTML = '<div class="spinner"></div>';
+    let url = `/api/movies/?page=${currentPage}`;
+    if (currentGenre) url += `&genre=${encodeURIComponent(currentGenre)}`;
+    if (currentType)  url += `&type=${currentType}`;
+    const data = await API.get(url);
+    const label = currentType === 'tv' ? 'TV Shows' : currentType === 'movie' ? 'Movies' : 'All';
+    document.getElementById('grid-title').textContent =
+      currentGenre ? `${currentGenre} — ${label}` : label;
+    renderGrid(data.movies);
+    renderPagination(data.page, data.pages);
+  }
+
+  // Type tabs
+  document.querySelectorAll('.type-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.type-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      currentType  = tab.dataset.type;
+      currentGenre = '';
+      currentPage  = 1;
+      loadGenres();
+      loadMovies();
+    });
+  });
+
+  // ── Search + Autocomplete system ──
+  const searchInput  = document.getElementById('search-input');
+  const acDropdown   = document.getElementById('ac-dropdown');
+  let searchTimer, acTimer;
+  let _searchActive  = false;
+  let _acIndex       = -1;
+
+  function _setSearchMode(active) {
+    _searchActive = active;
+    if (active) {
+      document.getElementById('search-results-section').style.display = '';
+      document.getElementById('browse-section').style.display = 'none';
+    } else {
+      document.getElementById('search-results-section').style.display = 'none';
+      document.getElementById('browse-section').style.display = '';
+    }
+  }
+
+  function _renderAC(suggestions) {
+    if (!suggestions || suggestions.length === 0) {
+      acDropdown.classList.remove('open');
+      acDropdown.innerHTML = '';
+      return;
+    }
+    _acIndex = -1;
+    acDropdown.innerHTML = suggestions.map((s, i) => {
+      const badgeClass = s.type === 'tv' ? 'ac-badge-tv'
+        : (s.type === 'person' || s.type === 'director') ? 'ac-badge-person'
+        : 'ac-badge-movie';
+      const badgeText = s.type === 'tv' ? 'TV' : s.type === 'person' ? 'Actor' : s.type === 'director' ? 'Director' : 'Movie';
+
+      let visual = '';
+      if (s.poster) {
+        visual = `<img class="ac-item-poster" src="${s.poster}" alt="" loading="lazy" onerror="this.style.display='none'">`;
+      } else if (s.type === 'person' || s.type === 'director') {
+        const initials = s.text.split(' ').filter(Boolean).map(w => w[0]).slice(0, 2).join('').toUpperCase();
+        visual = `<div class="ac-item-avatar">${initials}</div>`;
+      }
+
+      const sub = s.sub ? s.sub : (s.year ? `${s.year}${s.rating ? ' · ★ ' + s.rating : ''}` : '');
+
+      return `<div class="ac-item" data-idx="${i}" data-text="${s.text.replace(/"/g, '&quot;')}" data-type="${s.type}" ${s.id ? `data-id="${s.id}"` : ''}>
+        ${visual}
+        <div class="ac-item-info">
+          <div class="ac-item-title">${s.text}</div>
+          ${sub ? `<div class="ac-item-sub">${sub}</div>` : ''}
+        </div>
+        <span class="ac-item-badge ${badgeClass}">${badgeText}</span>
+      </div>`;
+    }).join('') + '<div class="ac-hint">↑↓ navigate · Enter to search · Esc to close</div>';
+
+    acDropdown.classList.add('open');
+
+    acDropdown.querySelectorAll('.ac-item').forEach(item => {
+      item.addEventListener('mousedown', e => {
+        e.preventDefault();
+        _selectAC(item);
+      });
+    });
+  }
+
+  function _selectAC(item) {
+    const type = item.dataset.type;
+    const text = item.dataset.text;
+    const id   = item.dataset.id;
+    acDropdown.classList.remove('open');
+
+    if (id && type !== 'person' && type !== 'director') {
+      searchInput.value = text;
+      openDetail(parseInt(id), type);
+      return;
+    }
+
+    searchInput.value = text;
+    _executeSearch(text);
+  }
+
+  async function _executeSearch(q) {
+    acDropdown.classList.remove('open');
+    if (!q) {
+      _setSearchMode(false);
+      loadMovies();
+      return;
+    }
+    _setSearchMode(true);
+    const grid = document.getElementById('search-grid');
+    grid.innerHTML = '<div class="spinner"></div>';
+    try {
+      let url = `/api/movies/search?q=${encodeURIComponent(q)}`;
+      if (currentType) url += `&type=${currentType}`;
+      const data = await API.get(url);
+      document.getElementById('search-title').textContent = `Results for "${q}"`;
+      renderGrid(data.movies, grid);
+    } catch {
+      grid.innerHTML = '<p style="color:var(--ink-60);grid-column:1/-1;padding:2rem 0;">Search failed — try a different query.</p>';
+    }
+  }
+
+  searchInput.addEventListener('input', () => {
+    clearTimeout(searchTimer);
+    clearTimeout(acTimer);
+    const q = searchInput.value.trim();
+    if (!q) {
+      acDropdown.classList.remove('open');
+      _setSearchMode(false);
+      loadMovies();
+      return;
+    }
+
+    acTimer = setTimeout(async () => {
+      try {
+        let url = `/api/movies/autocomplete?q=${encodeURIComponent(q)}`;
+        if (currentType) url += `&type=${currentType}`;
+        const data = await API.get(url);
+        if (searchInput.value.trim() === q) _renderAC(data.suggestions);
+      } catch {}
+    }, 150);
+
+    searchTimer = setTimeout(() => _executeSearch(q), 500);
+  });
+
+  searchInput.addEventListener('keydown', e => {
+    const items = acDropdown.querySelectorAll('.ac-item');
+    if (!acDropdown.classList.contains('open') || items.length === 0) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        clearTimeout(searchTimer);
+        _executeSearch(searchInput.value.trim());
+      }
+      return;
+    }
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      _acIndex = Math.min(_acIndex + 1, items.length - 1);
+      items.forEach((it, i) => it.classList.toggle('ac-active', i === _acIndex));
+      items[_acIndex]?.scrollIntoView({ block: 'nearest' });
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      _acIndex = Math.max(_acIndex - 1, 0);
+      items.forEach((it, i) => it.classList.toggle('ac-active', i === _acIndex));
+      items[_acIndex]?.scrollIntoView({ block: 'nearest' });
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      clearTimeout(searchTimer);
+      if (_acIndex >= 0 && _acIndex < items.length) {
+        _selectAC(items[_acIndex]);
+      } else {
+        acDropdown.classList.remove('open');
+        _executeSearch(searchInput.value.trim());
+      }
+    } else if (e.key === 'Escape') {
+      acDropdown.classList.remove('open');
+      _acIndex = -1;
+    }
+  });
+
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.search-tile')) {
+      acDropdown.classList.remove('open');
+    }
+  });
+
+  searchInput.addEventListener('focus', () => {
+    if (searchInput.value.trim().length >= 2 && acDropdown.children.length > 0) {
+      acDropdown.classList.add('open');
+    }
+  });
+
+  // ---- Init ----
+  document.addEventListener('DOMContentLoaded', async () => {
+    loadGenres();
+    loadMovies();
+
+    // Load top-rated for featured + film tiles + ticker
+    try {
+      const url = '/api/recommend/top' + (currentType ? `?type=${currentType}` : '');
+      const data = await API.get(url);
+      const movies = data.movies || [];
+
+      if (movies.length > 0) populateFeatured(movies[0]);
+      if (movies.length > 1) populateFilmTile('film-tile-1', movies[1], 2, 'Trending');
+      if (movies.length > 2) populateFilmTile('film-tile-2', movies[2], 3, 'Hidden Gem');
+      if (movies.length > 3) populateFilmTile('film-tile-3', movies[3], 4, 'For you');
+      if (movies.length > 4) populateFilmTile('film-tile-4', movies[4], 5, 'Recommended');
+      if (movies.length > 5) populateFilmTile('film-tile-5', movies[5], 6, 'New');
+
+      populateTicker(movies);
+    } catch {}
+
+    // Show surprise + twins for everyone (decorative / public API)
+    document.getElementById('surprise-tile').style.display = '';
+    document.getElementById('surprise-btn').addEventListener('click', rollSurprise);
+    populateTwins();
+
+    if (Auth.isLoggedIn()) {
+      loadGenreDNA();
+
+      // Stats tile
+      try {
+        const wData = await API.get('/api/user/watched');
+        const count = (wData.movie_ids || []).length + (wData.tv_ids || []).length;
+        document.getElementById('stat-count').textContent = count;
+        document.getElementById('stat-caption').textContent = `films in 2026`;
+        document.getElementById('stat-tile').style.display = '';
+      } catch {}
+
+      // Queue
+      loadQueue();
+    }
+  });
+</script>
+{% endblock %}

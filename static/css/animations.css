@@ -1,0 +1,121 @@
+/* ============================================================
+   MAPLE — Animation Keyframes
+   ============================================================ */
+
+/* Page entrance */
+.page-fade-in {
+  animation: pageFade 0.5s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+@keyframes pageFade {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Fade in (generic) */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Card grid entrance */
+.movie-card {
+  animation: cardEntrance 0.45s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+.movie-card:nth-child(1)  { animation-delay: 0.02s; }
+.movie-card:nth-child(2)  { animation-delay: 0.04s; }
+.movie-card:nth-child(3)  { animation-delay: 0.06s; }
+.movie-card:nth-child(4)  { animation-delay: 0.08s; }
+.movie-card:nth-child(5)  { animation-delay: 0.10s; }
+.movie-card:nth-child(6)  { animation-delay: 0.12s; }
+.movie-card:nth-child(7)  { animation-delay: 0.14s; }
+.movie-card:nth-child(8)  { animation-delay: 0.16s; }
+.movie-card:nth-child(n+9){ animation-delay: 0.18s; }
+
+@keyframes cardEntrance {
+  from { opacity: 0; transform: scale(0.92) translateY(12px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* Featured leaf watermark drift */
+@keyframes drift {
+  0%, 100% { transform: rotate(-8deg) translate(0, 0); }
+  50%      { transform: rotate(4deg) translate(-10px, 10px); }
+}
+
+/* Taste DNA bar grow */
+@keyframes barGrow {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+/* Ticker marquee scroll */
+@keyframes tickerScroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* Modal entrance */
+@keyframes modalIn {
+  from { transform: translateY(20px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+
+/* Toast in/out */
+@keyframes toastIn {
+  from { transform: translateX(-50%) translateY(-20px); opacity: 0; }
+  to   { transform: translateX(-50%) translateY(0); opacity: 1; }
+}
+@keyframes toastOut {
+  from { opacity: 1; }
+  to   { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+}
+
+/* Surprise dice spin */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Loading spinner */
+.spinner {
+  width: 36px;
+  height: 36px;
+  border: 2px solid rgba(210, 90, 40, 0.15);
+  border-top-color: var(--leaf-flame);
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+  margin: 2rem auto;
+}
+
+/* Maple shimmer for text */
+.text-maple {
+  background: linear-gradient(
+    90deg,
+    #ff6b35 0%,
+    #f7c59f 25%,
+    #e63946 50%,
+    #f4a261 75%,
+    #ff6b35 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: mapleShimmer 3.5s linear infinite;
+}
+
+@keyframes mapleShimmer {
+  from { background-position: 0% center; }
+  to   { background-position: 200% center; }
+}
+
+/* Stagger for list items */
+.stagger > * {
+  animation: cardEntrance 0.4s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+.stagger > *:nth-child(1) { animation-delay: 0.05s; }
+.stagger > *:nth-child(2) { animation-delay: 0.10s; }
+.stagger > *:nth-child(3) { animation-delay: 0.15s; }
+.stagger > *:nth-child(4) { animation-delay: 0.20s; }
+.stagger > *:nth-child(n+5) { animation-delay: 0.25s; }

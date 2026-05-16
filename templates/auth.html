@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block title %}Maple — Sign In{% endblock %}
+{% block content %}
+<div style="min-height:calc(100vh - 64px);display:flex;align-items:center;justify-content:center;padding:2rem;">
+  <div class="form-glass page-fade-in" style="width:100%;max-width:420px;">
+    <!-- Tab switcher -->
+    <div style="display:flex;background:rgba(255,255,255,0.05);border-radius:99px;padding:4px;margin-bottom:2rem;">
+      <button class="tab-btn active" id="tab-login" onclick="switchTab('login')"
+        style="flex:1;padding:0.5rem;border-radius:99px;font-size:0.9rem;font-weight:600;transition:all 0.25s;color:var(--ink-60);">
+        Sign In
+      </button>
+      <button class="tab-btn" id="tab-signup" onclick="switchTab('signup')"
+        style="flex:1;padding:0.5rem;border-radius:99px;font-size:0.9rem;font-weight:600;transition:all 0.25s;color:var(--ink-60);">
+        Sign Up
+      </button>
+    </div>
+
+    <!-- Login form -->
+    <form id="form-login" onsubmit="handleLogin(event)">
+      <h2 style="font-size:1.5rem;font-weight:800;margin-bottom:0.3rem;">Welcome back</h2>
+      <p style="color:var(--ink-60);font-size:0.88rem;margin-bottom:1.75rem;">Sign in to get personalized recommendations</p>
+      <div class="form-field">
+        <label class="form-label">Username or Email</label>
+        <input class="form-input" type="text" id="login-identifier" placeholder="Enter username or email" required>
+      </div>
+      <div class="form-field">
+        <label class="form-label">Password</label>
+        <input class="form-input" type="password" id="login-password" placeholder="Enter password" required>
+      </div>
+      <button type="submit" class="btn btn-primary w-full" style="margin-top:0.5rem;" id="login-btn">Sign In</button>
+    </form>
+
+    <!-- Signup form -->
+    <form id="form-signup" class="hidden" onsubmit="handleSignup(event)">
+      <h2 style="font-size:1.5rem;font-weight:800;margin-bottom:0.3rem;">Create account</h2>
+      <p style="color:var(--ink-60);font-size:0.88rem;margin-bottom:1.75rem;">Start your personalized movie journey</p>
+      <div class="form-field">
+        <label class="form-label">Username</label>
+        <input class="form-input" type="text" id="signup-username" placeholder="Choose a username" required>
+      </div>
+      <div class="form-field">
+        <label class="form-label">Email</label>
+        <input class="form-input" type="email" id="signup-email" placeholder="your@email.com" required>
+      </div>
+      <div class="form-field">
+        <label class="form-label">Password</label>
+        <input class="form-input" type="password" id="signup-password" placeholder="Min 6 characters" required>
+      </div>
+      <button type="submit" class="btn btn-primary w-full" style="margin-top:0.5rem;" id="signup-btn">Create Account</button>
+    </form>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Functions must be global so onsubmit/onclick attributes can reach them
+  function switchTab(tab) {
+    document.getElementById('form-login').classList.toggle('hidden', tab !== 'login');
+    document.getElementById('form-signup').classList.toggle('hidden', tab !== 'signup');
+    document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+    document.getElementById('tab-signup').classList.toggle('active', tab === 'signup');
+  }
+
+  async function handleLogin(e) {
+    e.preventDefault();
+    const btn = document.getElementById('login-btn');
+    btn.textContent = 'Signing in...'; btn.disabled = true;
+    try {
+      const data = await API.post('/api/auth/login', {
+        identifier: document.getElementById('login-identifier').value,
+        password: document.getElementById('login-password').value
+      });
+      Auth.setToken(data.token, data.user);
+      Toast.success('Welcome back, ' + data.user.username + '!');
+      setTimeout(() => window.location.href = '/', 600);
+    } catch (err) {
+      Toast.error(err.message || 'Login failed');
+      btn.textContent = 'Sign In'; btn.disabled = false;
+    }
+  }
+
+  async function handleSignup(e) {
+    e.preventDefault();
+    const btn = document.getElementById('signup-btn');
+    btn.textContent = 'Creating account...'; btn.disabled = true;
+    try {
+      const data = await API.post('/api/auth/signup', {
+        username: document.getElementById('signup-username').value,
+        email: document.getElementById('signup-email').value,
+        password: document.getElementById('signup-password').value
+      });
+      Auth.setToken(data.token, data.user);
+      Toast.success('Account created! Welcome, ' + data.user.username + '!');
+      setTimeout(() => window.location.href = '/', 600);
+    } catch (err) {
+      Toast.error(err.message || 'Signup failed');
+      btn.textContent = 'Create Account'; btn.disabled = false;
+    }
+  }
+
+  // Redirect after deferred scripts have loaded (Auth is now defined)
+  document.addEventListener('DOMContentLoaded', () => {
+    if (Auth.isLoggedIn()) window.location.href = '/';
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% block title %}Maple — My List{% endblock %}
+{% block content %}
+<div class="page-fade-in" style="padding:2rem;max-width:1400px;margin:0 auto;">
+  <div id="profile-guard" class="hidden" style="text-align:center;padding:4rem;color:var(--ink-60);">
+    <p style="font-size:1.1rem;margin-bottom:1rem;">Sign in to view your saved movies</p>
+    <a href="/auth" class="btn btn-primary">Sign In</a>
+  </div>
+
+  <div id="profile-content">
+    <div style="margin-bottom:2rem;">
+      <h1 style="font-size:2rem;font-weight:800;letter-spacing:-0.03em;" id="profile-title">My List</h1>
+      <p style="color:var(--ink-60);margin-top:0.3rem;" id="profile-sub"></p>
+    </div>
+
+    <div style="margin-bottom:3rem;">
+      <h2 class="section-title">Favorites</h2>
+      <div id="favs-list">
+        <div class="spinner"></div>
+      </div>
+      <p id="favs-empty" class="hidden" style="color:var(--ink-60);padding:1rem 0;">
+        No favorites yet. Browse movies and add some!
+      </p>
+    </div>
+
+    <div style="margin-bottom:3rem;">
+      <h2 class="section-title">Watched</h2>
+      <div id="watched-list">
+        <div class="spinner"></div>
+      </div>
+      <p id="watched-empty" class="hidden" style="color:var(--ink-60);padding:1rem 0;">
+        No watched movies yet.
+      </p>
+    </div>
+
+    <div style="margin-bottom:3rem;">
+      <h2 class="section-title">Watchlist</h2>
+      <div id="watchlist-list">
+        <div class="spinner"></div>
+      </div>
+      <p id="watchlist-empty" class="hidden" style="color:var(--ink-60);padding:1rem 0;">
+        No items in your watchlist yet.
+      </p>
+    </div>
+
+    <div style="margin-bottom:3rem;" id="rec-section">
+      <h2 class="section-title">Recommended For You</h2>
+      <div class="movies-grid" id="rec-row">
+        <div class="spinner"></div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/recommendations.js"></script>
+<script>
+  // Fetch details for a mixed list of {id, type} entries
+  async function fetchDetails(entries) {
+    const results = await Promise.all(
+      entries.slice(0, 24).map(({ id, type }) =>
+        API.get(`/api/movies/${id}?type=${type}`).then(d => d.movie).catch(() => null)
+      )
+    );
+    return results.filter(Boolean);
+  }
+
+  async function loadProfile() {
+    if (!Auth.isLoggedIn()) {
+      document.getElementById('profile-content').classList.add('hidden');
+      document.getElementById('profile-guard').classList.remove('hidden');
+      return;
+    }
+
+    const user = Auth.getUser();
+    document.getElementById('profile-title').textContent = `${user.username}'s List`;
+    document.getElementById('profile-sub').textContent = 'Your personal movie & TV collection';
+
+    // Load favorites, watched, and watchlist in parallel
+    const [favData, watchData, wlData] = await Promise.all([
+      API.get('/api/user/favorites').catch(() => ({ movie_ids: [], tv_ids: [] })),
+      API.get('/api/user/watched').catch(() => ({ movie_ids: [], tv_ids: [] })),
+      API.get('/api/user/watchlist').catch(() => ({ movie_ids: [], tv_ids: [] })),
+    ]);
+
+    // Build interleaved entry lists so movies and TV shows alternate
+    function interleave(movieIds, tvIds) {
+      const entries = [];
+      const mLen = movieIds.length, tLen = tvIds.length;
+      for (let i = 0; i < Math.max(mLen, tLen); i++) {
+        if (i < mLen) entries.push({ id: movieIds[i], type: 'movie' });
+        if (i < tLen) entries.push({ id: tvIds[i],    type: 'tv' });
+      }
+      return entries;
+    }
+
+    // Favorites
+    const favEntries = interleave(favData.movie_ids || [], favData.tv_ids || []);
+    if (favEntries.length === 0) {
+      document.getElementById('favs-list').innerHTML = '';
+      document.getElementById('favs-empty').classList.remove('hidden');
+    } else {
+      const movies = await fetchDetails(favEntries);
+      renderListView(movies, document.getElementById('favs-list'));
+    }
+
+    // Watched
+    const watchEntries = interleave(watchData.movie_ids || [], watchData.tv_ids || []);
+    if (watchEntries.length === 0) {
+      document.getElementById('watched-list').innerHTML = '';
+      document.getElementById('watched-empty').classList.remove('hidden');
+    } else {
+      const movies = await fetchDetails(watchEntries);
+      renderListView(movies, document.getElementById('watched-list'));
+    }
+
+    // Watchlist
+    const wlEntries = interleave(wlData.movie_ids || [], wlData.tv_ids || []);
+    if (wlEntries.length === 0) {
+      document.getElementById('watchlist-list').innerHTML = '';
+      document.getElementById('watchlist-empty').classList.remove('hidden');
+    } else {
+      const movies = await fetchDetails(wlEntries);
+      renderListView(movies, document.getElementById('watchlist-list'));
+    }
+
+    // Personalized recommendations
+    const recData = await API.get('/api/recommend/personalized').catch(() => ({ movies: [] }));
+    if (recData.movies.length > 0) {
+      renderGrid(recData.movies, document.getElementById('rec-row'));
+    } else {
+      document.getElementById('rec-section').innerHTML += '<p style="color:var(--ink-60);">Add some movies to your list to get personalized recommendations!</p>';
+      document.getElementById('rec-row').remove();
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', loadProfile);
+</script>
+{% endblock %}

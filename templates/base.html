@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Maple{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@300;400;500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,400;1,9..144,400&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/base.css">
+  <link rel="stylesheet" href="/static/css/glass.css">
+  <link rel="stylesheet" href="/static/css/animations.css">
+  {% block head %}{% endblock %}
+</head>
+<body>
+
+  <div class="page">
+    <!-- Masthead -->
+    <header class="masthead">
+      <a href="/" class="brand">
+        <div class="brand-mark">
+          <svg width="34" height="34" viewBox="0 0 64 64" fill="none">
+            <defs>
+              <linearGradient id="leafGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#f4a433"/>
+                <stop offset="50%" stop-color="#ff5a1f"/>
+                <stop offset="100%" stop-color="#a5120f"/>
+              </linearGradient>
+            </defs>
+            <path fill="url(#leafGrad)" d="M32 8 C 28 8, 26 12, 26 16 C 22 14, 16 14, 13 18 C 10 22, 12 28, 16 30 C 12 32, 9 36, 11 40 C 13 44, 19 44, 23 42 C 22 46, 24 50, 28 50 C 30 49, 31 46, 31 43 L 31 56 L 33 56 L 33 43 C 33 46, 34 49, 36 50 C 40 50, 42 46, 41 42 C 45 44, 51 44, 53 40 C 55 36, 52 32, 48 30 C 52 28, 54 22, 51 18 C 48 14, 42 14, 38 16 C 38 12, 36 8, 32 8 Z"/>
+          </svg>
+        </div>
+        <div class="brand-name">MAPLE</div>
+        <div class="brand-sub">A quieter way<br>to find what to watch</div>
+      </a>
+
+      <nav class="nav">
+        <a href="/" class="nav-item" id="nav-home">Discover</a>
+        <span class="nav-dot hidden"></span>
+        <a href="/profile" class="nav-item hidden" id="nav-profile">My List</a>
+        <a href="/watchlist" class="nav-item hidden" id="nav-watchlist">Watchlist</a>
+      </nav>
+
+      <div class="nav" style="gap:16px; align-items:center;">
+        <a href="/auth" class="nav-item" id="nav-auth">Sign In</a>
+        <button class="nav-item hidden" id="nav-logout">Sign Out</button>
+      </div>
+    </header>
+
+    <!-- Main content -->
+    <main>
+      {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div>MAPLE · quiet cinema · tonight's edition</div>
+      <div><span class="live-dot">●</span> listening · 9,241 titles</div>
+      <div>press <span class="key">?</span> for help</div>
+    </footer>
+  </div>
+
+  <!-- Modal overlay (global) -->
+  <div id="modal-overlay">
+    <div id="modal">
+      <div class="modal-poster" id="modal-poster">
+        <div class="modal-poster-year" id="modal-poster-year"></div>
+        <div class="modal-poster-title" id="modal-poster-title"></div>
+        <img id="modal-poster-img" src="" alt="" style="display:none;">
+      </div>
+      <div class="modal-body">
+        <button class="modal-close" id="modal-close">&times;</button>
+        <div class="modal-label">On file</div>
+        <h2 class="modal-title" id="modal-title"></h2>
+        <div class="modal-meta" id="modal-meta"></div>
+        <div class="modal-desc" id="modal-desc"></div>
+
+        <!-- AI explanation -->
+        <div class="modal-ai" id="modal-ai" style="display:none;">
+          <span class="ai-label">Why MAPLE picked this for you</span>
+          <span id="modal-ai-text"></span>
+        </div>
+
+        <!-- Director -->
+        <div id="modal-director-section" style="display:none;margin-top:1rem;">
+          <div class="ai-label" style="margin-bottom:0.4rem;">Director</div>
+          <p id="modal-director" style="font-size:0.85rem;color:var(--ink-80);"></p>
+        </div>
+
+        <!-- Cast -->
+        <div id="modal-cast-section" style="display:none;margin-top:1rem;">
+          <div class="ai-label" style="margin-bottom:0.5rem;">Cast</div>
+          <div id="modal-cast" class="cast-grid"></div>
+        </div>
+
+        <!-- Similar -->
+        <div id="similar-section" style="margin-top:1.25rem;">
+          <div class="ai-label" style="margin-bottom:0.5rem;">More Like This</div>
+          <div class="movies-row" id="similar-row"></div>
+        </div>
+
+        <!-- Actions -->
+        <div class="modal-actions" id="modal-actions"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom bubble cursor -->
+  <div class="bubble-cursor" id="bubble-cursor">
+    <div class="bubble-refract"></div>
+    <div class="bubble-specular"></div>
+  </div>
+
+  <!-- Toast container -->
+  <div id="toast-container"></div>
+
+  <!-- Global scripts -->
+  <script src="/static/js/api.js" defer></script>
+  <script src="/static/js/auth.js" defer></script>
+  <script src="/static/js/movies.js" defer></script>
+  {% block scripts %}{% endblock %}
+  <script>
+    // Navbar active state
+    const path = window.location.pathname;
+    document.querySelectorAll('.nav-item').forEach(l => {
+      if (l.getAttribute('href') === path) l.classList.add('active');
+    });
+
+    // Bubble cursor — magnifying glass lens effect (same technique as pre-redesign)
+    (() => {
+      const cursor = document.getElementById('bubble-cursor');
+      if (!cursor) return;
+
+      const HOVER_SEL   = '.movie-card, .tile';
+      const INTERACT_SEL = 'a, button, .genre-chip, .mood-chip, .type-tab, .btn, .btn-dark, .btn-light, .search-line, .search-input, .rating-badge, .modal-close, .list-item, .queue-item, .twin-row, .pagination-btn, .arrow-btn, .featured-btn, .icon-btn, input';
+
+      const LENS_R_DEFAULT  = 11;
+      const LENS_R_INTERACT = 14;
+      const LENS_R_EXPANDED = 19;
+      const LENS_MAX_SCALE  = 1.25;
+
+      const LENS_SEL = 'h1,h2,h3,h4,h5,h6,p,span:not(.bubble-refract):not(.bubble-specular),label,a,button,li,.section-title,.movie-card-title,.movie-card-meta,.film-cover-title,.film-info,.featured-title,.lede-headline,.genre-chip,.type-tab,.btn,.btn-dark,.btn-light,.rating-badge,.modal-close,.search-line,.search-input,.tile-label,.mood-chip,.queue-item,.twin-row,.dna-bar-name,.dna-bar-pct,.stat-number,.surprise-head,.footer,em,input';
+
+      let activeCard = null;
+      let lensR = LENS_R_DEFAULT;
+
+      let targetX = -100, targetY = -100;
+      let curX = -100, curY = -100;
+      const LERP = 0.35;
+
+      let lensEls = [];
+      let lensRects = [];
+      let rectsStale = true;
+
+      function collectLensElements() {
+        lensEls = [...document.querySelectorAll(LENS_SEL)].filter(el => {
+          if (el.closest('.movie-card') || el.closest('.bubble-cursor')) return false;
+          if (el.closest('#modal-overlay') && !document.getElementById('modal-overlay').classList.contains('open')) return false;
+          if (el.offsetParent === null && getComputedStyle(el).position !== 'fixed') return false;
+          return true;
+        });
+        lensEls.forEach(el => el.classList.add('lens-target'));
+        lensRects = new Array(lensEls.length);
+        rectsStale = true;
+      }
+
+      collectLensElements();
+      const observer = new MutationObserver(() => {
+        clearTimeout(observer._timer);
+        observer._timer = setTimeout(collectLensElements, 300);
+      });
+      observer.observe(document.body, { childList: true, subtree: true });
+
+      function markStale() { rectsStale = true; }
+      window.addEventListener('scroll', markStale, { passive: true });
+      window.addEventListener('resize', markStale, { passive: true });
+
+      function refreshRects() {
+        for (let i = 0; i < lensEls.length; i++) {
+          const r = lensEls[i].getBoundingClientRect();
+          lensRects[i] = { l: r.left, t: r.top, r: r.right, b: r.bottom,
+                           cx: r.left + r.width / 2, cy: r.top + r.height / 2 };
+        }
+        rectsStale = false;
+      }
+
+      function distToRect(cx, cy, rect) {
+        const nearX = Math.max(rect.l, Math.min(cx, rect.r));
+        const nearY = Math.max(rect.t, Math.min(cy, rect.b));
+        const dx = cx - nearX, dy = cy - nearY;
+        return Math.sqrt(dx * dx + dy * dy);
+      }
+
+      // Hide system cursor once our bubble is active
+      document.documentElement.style.cursor = 'none';
+      document.body.style.cursor = 'none';
+
+      function tick() {
+        curX += (targetX - curX) * LERP;
+        curY += (targetY - curY) * LERP;
+        cursor.style.transform = `translate(${curX}px, ${curY}px) translate(-50%, -50%)`;
+
+        if (activeCard) {
+          const r = activeCard.getBoundingClientRect();
+          const cardCx = r.left + r.width / 2;
+          const cardCy = r.top + r.height / 2;
+          const dx = cardCx - targetX, dy = cardCy - targetY;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          const edgeDist = Math.max(r.width, r.height) / 2;
+          if (dist < edgeDist) {
+            const pull = 0.06 * (1 - dist / edgeDist);
+            curX += dx * pull;
+            curY += dy * pull;
+          }
+        }
+
+        if (rectsStale) refreshRects();
+
+        for (let i = 0; i < lensEls.length; i++) {
+          const rc = lensRects[i];
+          if (!rc) continue;
+
+          const edgeDist = distToRect(curX, curY, rc);
+
+          if (edgeDist < lensR) {
+            const centerDist = Math.sqrt((curX - rc.cx) ** 2 + (curY - rc.cy) ** 2);
+            const t = Math.max(0, (1 + Math.cos(Math.PI * Math.min(centerDist, lensR) / lensR)) / 2);
+            const scale = 1 + (LENS_MAX_SCALE - 1) * t;
+            lensEls[i].style.transform = `scale(${scale.toFixed(4)})`;
+          } else if (lensEls[i].style.transform) {
+            lensEls[i].style.transform = '';
+          }
+        }
+
+        requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+
+      document.addEventListener('mousemove', e => {
+        targetX = e.clientX;
+        targetY = e.clientY;
+      }, { passive: true });
+
+      document.addEventListener('mouseover', e => {
+        const card = e.target.closest(HOVER_SEL);
+        if (card) {
+          cursor.classList.add('expanded');
+          cursor.classList.remove('interact');
+          activeCard = card;
+          lensR = LENS_R_EXPANDED;
+        } else if (e.target.closest(INTERACT_SEL)) {
+          cursor.classList.add('interact');
+          lensR = LENS_R_INTERACT;
+        }
+      }, { passive: true });
+
+      document.addEventListener('mouseout', e => {
+        const card = e.target.closest(HOVER_SEL);
+        if (card) {
+          cursor.classList.remove('expanded');
+          activeCard = null;
+          lensR = LENS_R_DEFAULT;
+        } else if (e.target.closest(INTERACT_SEL)) {
+          cursor.classList.remove('interact');
+          lensR = LENS_R_DEFAULT;
+        }
+      }, { passive: true });
+
+      document.addEventListener('mouseleave', () => {
+        targetX = -200; targetY = -200;
+        activeCard = null;
+        lensR = LENS_R_DEFAULT;
+        lensEls.forEach(el => { el.style.transform = ''; });
+      });
+
+      document.addEventListener('mousedown', () => {
+        cursor.style.setProperty('--bx', curX + 'px');
+        cursor.style.setProperty('--by', curY + 'px');
+        cursor.classList.remove('jiggle');
+        void cursor.offsetWidth;
+        cursor.classList.add('jiggle');
+      });
+
+      cursor.addEventListener('animationend', () => {
+        cursor.classList.remove('jiggle');
+      });
+    })();
+  </script>
+</body>
+</html>

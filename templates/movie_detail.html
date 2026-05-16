@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block title %}Maple — Movie{% endblock %}
+{% block content %}
+<div class="page-fade-in" style="padding:2rem;max-width:1000px;margin:0 auto;">
+  <div id="movie-content">
+    <div class="spinner"></div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const movieId      = {{ movie_id }};
+  const contentType  = '{{ content_type | default("movie") }}';
+
+  async function loadMovieDetail() {
+    try {
+      const data    = await API.get(`/api/movies/${movieId}?type=${contentType}`);
+      const m       = data.movie;
+      const poster  = m.poster || '/static/assets/placeholder.png';
+
+      const [favData, watchData] = Auth.isLoggedIn()
+        ? await Promise.all([
+            API.get('/api/user/favorites').catch(() => ({ movie_ids: [], tv_ids: [] })),
+            API.get('/api/user/watched').catch(() => ({ movie_ids: [], tv_ids: [] })),
+          ])
+        : [{ movie_ids: [], tv_ids: [] }, { movie_ids: [], tv_ids: [] }];
+
+      const favIds     = contentType === 'tv' ? (favData.tv_ids   || []) : (favData.movie_ids   || []);
+      const watchedIds = contentType === 'tv' ? (watchData.tv_ids || []) : (watchData.movie_ids || []);
+      const isFav      = favIds.includes(m.id);
+      const isWatched  = watchedIds.includes(m.id);
+
+      document.title = `Maple — ${m.title}`;
+
+      const tvBadge = contentType === 'tv'
+        ? `<span style="font-size:0.75rem;background:rgba(99,102,241,0.35);border:1px solid rgba(99,102,241,0.5);border-radius:4px;padding:2px 8px;color:#a5b4fc;">TV Show</span>`
+        : '';
+
+      const safeTitle = m.title.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
+      document.getElementById('movie-content').innerHTML = `
+        <div style="display:grid;grid-template-columns:280px 1fr;gap:2rem;align-items:start;" class="detail-standalone">
+          <div style="border-radius:16px;overflow:hidden;box-shadow:var(--shadow-2);">
+            <img src="${poster}" alt="${safeTitle}" style="width:100%;display:block;" onerror="this.src='/static/assets/placeholder.png'">
+          </div>
+          <div>
+            <h1 style="font-size:2.2rem;font-weight:900;letter-spacing:-0.04em;margin-bottom:0.5rem;">${m.title}</h1>
+            <div style="display:flex;gap:0.6rem;flex-wrap:wrap;margin-bottom:1.25rem;">
+              ${m.year ? `<span class="genre-chip" style="pointer-events:none;">${m.year}</span>` : ''}
+              <span class="rating-badge">★ ${m.rating}</span>
+              ${tvBadge}
+              ${(m.genres || '').split(', ').filter(Boolean).map(g => `<span class="genre-chip" style="pointer-events:none;">${g}</span>`).join('')}
+              ${contentType === 'tv' && m.seasons ? `<span class="genre-chip" style="pointer-events:none;">${m.seasons} seasons</span>` : ''}
+            </div>
+            <p style="font-size:1rem;line-height:1.75;color:var(--ink-60);margin-bottom:1.5rem;">${m.overview}</p>
+            ${Auth.isLoggedIn() ? `
+            <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
+              <button class="btn ${isFav ? 'btn-primary' : 'btn-ghost'}" id="fav-btn" onclick="toggleFav(${m.id})">
+                ${isFav ? '♥ In Favorites' : '♡ Add to Favorites'}
+              </button>
+              <button class="btn ${isWatched ? 'btn-primary' : 'btn-ghost'}" id="watched-btn" onclick="toggleWatched(${m.id})">
+                ${isWatched ? '✓ Watched' : '○ Mark Watched'}
+              </button>
+            </div>` : `<a href="/auth" class="btn btn-ghost">Sign in to save</a>`}
+          </div>
+        </div>
+
+        <div style="margin-top:2.5rem;">
+          <h2 class="section-title">More Like This</h2>
+          <div class="movies-row" id="similar-row"></div>
+        </div>
+      `;
+
+      const simData = await API.get(`/api/recommend/similar/${m.id}?type=${contentType}`);
+      renderRow(document.getElementById('similar-row'), simData.movies);
+    } catch (err) {
+      document.getElementById('movie-content').innerHTML =
+        `<div style="text-align:center;padding:4rem;color:var(--ink-60);">Could not load details</div>`;
+    }
+  }
+
+  async function toggleFav(id) {
+    const btn = document.getElementById('fav-btn');
+    const isActive = btn.classList.contains('btn-primary');
+    if (isActive) {
+      await API.delete(`/api/user/favorites/${id}?type=${contentType}`);
+      btn.className = 'btn btn-ghost'; btn.textContent = '♡ Add to Favorites';
+      Toast.success('Removed from favorites');
+    } else {
+      await API.post('/api/user/favorites', { movie_id: id, content_type: contentType });
+      btn.className = 'btn btn-primary'; btn.textContent = '♥ In Favorites';
+      Toast.success('Added to favorites');
+    }
+  }
+
+  async function toggleWatched(id) {
+    const btn = document.getElementById('watched-btn');
+    const isActive = btn.classList.contains('btn-primary');
+    if (isActive) {
+      await API.delete(`/api/user/watched/${id}?type=${contentType}`);
+      btn.className = 'btn btn-ghost'; btn.textContent = '○ Mark Watched';
+      Toast.success('Removed from watched');
+    } else {
+      await API.post('/api/user/watched', { movie_id: id, content_type: contentType });
+      btn.className = 'btn btn-primary'; btn.textContent = '✓ Watched';
+      Toast.success('Marked as watched');
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', loadMovieDetail);
+</script>
+<style>
+  @media (max-width:640px) {
+    .detail-standalone { grid-template-columns: 1fr !important; }
+  }
+</style>
+{% endblock %}
