@@ -1154,46 +1154,18 @@
 
 .movies-row .movie-card {
   flex-shrink: 0;
-  min-width: 120px;
-  border-radius: 10px;
-  overflow: hidden;
-  cursor: none;
-  transition: transform 0.25s;
-  border: 1px solid var(--line);
-}
-.movies-row .movie-card:hover { transform: scale(1.05) translateY(-4px); }
-.movies-row .movie-card img {
-  width: 100%;
-  aspect-ratio: 2/3;
-  object-fit: cover;
+  width: 280px;
 }
 
 /* ── Movies grid (for browse / search results) ── */
 .movies-grid {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 14px;
-}
-.movies-grid .movie-card {
-  border-radius: 12px;
-  overflow: hidden;
-  cursor: none;
-  transition: transform 0.25s, box-shadow 0.25s;
-  border: 1px solid var(--line);
-  background: var(--bg-2);
-}
-.movies-grid .movie-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-2);
-}
-.movies-grid .movie-card img {
-  width: 100%;
-  aspect-ratio: 2/3;
-  object-fit: cover;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
 }
 
-@media (max-width: 900px) { .movies-grid { grid-template-columns: repeat(4, 1fr); } }
-@media (max-width: 560px) { .movies-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 900px) { .movies-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px) { .movies-grid { grid-template-columns: 1fr; } }
 
 /* ── List items (profile / watchlist) ── */
 .list-item {
@@ -1285,38 +1257,48 @@
   color: var(--leaf-ember);
 }
 
-/* ── Movie card internals (browse grid cards from makeCard) ── */
+/* ── Movie card (compact horizontal: thumb + info) ── */
 .movie-card {
-  position: relative;
-  background: var(--bg-2);
-}
-.card-bg {
-  position: absolute; inset: 0;
-  background-size: cover;
-  background-position: center;
-  filter: blur(12px) brightness(0.4);
-  z-index: 0;
-  border-radius: inherit;
-}
-.movie-card > img {
-  position: relative;
-  z-index: 1;
-}
-.movie-card-overlay {
-  position: absolute;
-  bottom: 0; left: 0; right: 0;
+  display: flex;
+  gap: 12px;
   padding: 10px;
-  background: linear-gradient(transparent, rgba(10,6,4,0.85));
-  z-index: 2;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  cursor: none;
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+}
+.movie-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--line-bright);
+  box-shadow: var(--shadow-1);
+}
+.card-thumb {
+  flex-shrink: 0;
+  width: 60px;
+  height: 90px;
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--bg-3);
+}
+.card-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.card-info {
+  flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 .movie-card-title {
   font-family: 'Instrument Serif', serif;
-  font-size: 14px;
+  font-size: 16px;
   color: var(--ink-100);
-  line-height: 1.25;
+  line-height: 1.2;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -1324,7 +1306,7 @@
 }
 .movie-card-meta {
   display: flex;
-  gap: 6px;
+  gap: 8px;
   align-items: center;
   flex-wrap: wrap;
 }
@@ -1336,7 +1318,7 @@
 .movie-card-actions {
   display: flex;
   gap: 4px;
-  margin-top: 4px;
+  margin-top: auto;
 }
 .icon-btn {
   width: 28px; height: 28px;

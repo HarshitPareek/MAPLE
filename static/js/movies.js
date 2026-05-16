@@ -52,9 +52,10 @@ function makeCard(movie) {
   card.dataset.id = movie.id;
   card.dataset.ct  = ct;
   card.innerHTML = `
-    <div class="card-bg" style="background-image:url('${poster}')"></div>
-    <img src="${poster}" alt="${safeTitle}" loading="lazy" onerror="this.src='/static/assets/placeholder.png'">
-    <div class="movie-card-overlay">
+    <div class="card-thumb">
+      <img src="${poster}" alt="${safeTitle}" loading="lazy" onerror="this.src='/static/assets/placeholder.png'">
+    </div>
+    <div class="card-info">
       <div class="movie-card-title">${safeTitle}</div>
       <div class="movie-card-meta">
         ${movie.year ? `<span>${movie.year}</span>` : ''}
@@ -250,73 +251,6 @@ function setupBubbleEffect(container) {
   });
 }
 
-// ---- Square bento layout ----
-// Only 1×1 (small) and 2×2 (big) square tiles — no rectangles.
-//
-// 6-card repeating block, 6 cols × 2 rows = 12 cells:
-//
-//   Pattern A: [B B][s][s][B B]    B: [B B][B B][s][s]    C: [s][s][B B][B B]
-//              [B B][s][s][B B]       [B B][B B][s][s]       [s][s][B B][B B]
-//
-// Math: 2 big (4 cells each = 8) + 4 small (1 cell each = 4) = 12 ✓
-// 24 cards ÷ 6 = 4 exact groups, 0 orphans.
-
-function _bentoColCount() {
-  const w = window.innerWidth;
-  if (w <= 560) return 2;
-  if (w <= 900) return 4;
-  return 6;
-}
-
-// Set grid-auto-rows so tiles have 2:3 portrait aspect ratio (like movie posters).
-// row height = column width × 1.5 → small tile = 1×1 (2:3), big tile = 2×2 (2:3).
-// Retries via rAF if container hasn't painted yet (clientWidth === 0).
-function setSquareRows(container) {
-  const cols  = _bentoColCount();
-  const gapPx = parseFloat(getComputedStyle(container).columnGap) || 8;
-  const w     = container.clientWidth;
-  if (w === 0) { requestAnimationFrame(() => setSquareRows(container)); return; }
-  const cellW = Math.floor((w - gapPx * (cols - 1)) / cols);
-  container.style.gridAutoRows = Math.round(cellW * 1.5) + 'px'; // 2:3 portrait
-}
-
-// ---- 6-col bento: only 1×1 (small) and 2×2 (large) squares ----
-// 6-card block × 4 = 24 cards, each block = 6 cols × 2 rows = 12 cells, 0 gaps.
-// 3 rotating patterns so the large tile walks left→right→center across rows:
-//
-//   A: [B B][s][s][B B]    B: [B B][B B][s][s]    C: [s][s][B B][B B]
-//      [B B][s][s][B B]       [B B][B B][s][s]       [s][s][B B][B B]
-//
-function applyBentoLayout(cards) {
-  const cols   = _bentoColCount();
-  const mobile = cols <= 2;
-
-  // On non-6-col breakpoints fall back to uniform flow
-  if (mobile || cols === 4) {
-    cards.forEach(c => { c.style.gridColumn = ''; c.style.gridRow = ''; });
-    return;
-  }
-
-  cards.forEach((card, i) => {
-    const block  = Math.floor(i / 6);
-    const offset = i % 6;
-    const rb     = block * 2 + 1; // 1-indexed CSS row start (2 rows per block)
-    const pat    = block % 3;     // rotate A(0) → B(1) → C(2) → A …
-
-    // [colStart, colEnd, rowStart, rowEnd] — all 1-indexed CSS grid lines
-    const L = {
-      0: [[1,3,rb,rb+2],[5,7,rb,rb+2],[3,4,rb,rb+1],[4,5,rb,rb+1],[3,4,rb+1,rb+2],[4,5,rb+1,rb+2]], // A
-      1: [[1,3,rb,rb+2],[3,5,rb,rb+2],[5,6,rb,rb+1],[6,7,rb,rb+1],[5,6,rb+1,rb+2],[6,7,rb+1,rb+2]], // B
-      2: [[3,5,rb,rb+2],[5,7,rb,rb+2],[1,2,rb,rb+1],[2,3,rb,rb+1],[1,2,rb+1,rb+2],[2,3,rb+1,rb+2]]  // C
-    }[pat][offset];
-
-    card.style.gridColumn = `${L[0]}/${L[1]}`;
-    card.style.gridRow    = `${L[2]}/${L[3]}`;
-  });
-}
-
-// Track all active bento grids for resize — Map<container, cards[]>
-const _bentoGrids = new Map();
 
 function renderGrid(movies, container = document.getElementById('movies-grid')) {
   if (!container) return;
@@ -325,24 +259,11 @@ function renderGrid(movies, container = document.getElementById('movies-grid')) 
     container.innerHTML = '<p style="color:var(--ink-60);grid-column:1/-1;padding:2rem 0;">No results found.</p>';
     return;
   }
-  // Sort highest-rated first → they land in big-tile positions (indices 0 & 1
-  // of each 6-card block) so better-poster movies get the large tiles.
   const sorted = [...movies].sort((a, b) => b.rating - a.rating);
   const cards  = sorted.map(m => makeCard(m));
   cards.forEach(card => container.appendChild(card));
-  setSquareRows(container);
-  applyBentoLayout(cards);
   setupBubbleEffect(container);
-  _bentoGrids.set(container, cards);
 }
-
-// Keep squares on window resize — update every registered bento grid
-window.addEventListener('resize', () => {
-  _bentoGrids.forEach((cards, container) => {
-    setSquareRows(container);
-    applyBentoLayout(cards);
-  });
-});
 
 function renderRow(container, movies) {
   if (!container) return;
