@@ -20,30 +20,6 @@
 <!-- Bento grid -->
 <section class="bento" id="bento-grid">
 
-  <!-- Featured tile (populated by JS) -->
-  <div class="tile featured s-12 r-4" id="featured-tile" style="display:none;">
-    <div class="featured-leaf" id="featured-leaf"></div>
-    <div style="display:flex;flex-direction:column;z-index:1;">
-      <div class="featured-label" id="featured-label"></div>
-      <div class="featured-title" id="featured-title"></div>
-      <div class="featured-meta" id="featured-meta"></div>
-    </div>
-    <div class="featured-right">
-      <div class="featured-quote" id="featured-quote"></div>
-      <div class="featured-footer">
-        <button class="featured-btn" id="featured-btn">
-          <span>Watch tonight</span>
-          <span class="arrow-circle">
-            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4">
-              <path d="M3 8h10M9 4l4 4-4 4" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </span>
-        </button>
-        <div class="featured-idx" id="featured-idx"></div>
-      </div>
-    </div>
-  </div>
-
   <!-- Search tile -->
   <div class="tile search-tile s-8 r-2">
     <div class="tile-label"><span class="idx">01</span><span>Find it</span></div>
@@ -136,14 +112,6 @@
     <div class="film-info"><div class="film-info-meta"></div><div class="film-info-meta"></div></div>
   </div>
 
-  <!-- Ticker -->
-  <div class="tile ticker-tile s-12" id="ticker-tile" style="display:none;height:72px;">
-    <div class="ticker-label">Just added</div>
-    <div class="ticker-strip">
-      <div class="ticker-content" id="ticker-content"></div>
-    </div>
-  </div>
-
 </section>
 
 <!-- Search results — hidden by default -->
@@ -213,49 +181,6 @@
   document.getElementById('lede-sub').textContent =
     `Curated for you · at ${today.getHours()%12||12}:${String(today.getMinutes()).padStart(2,'0')}${today.getHours()>=12?'pm':'am'}.`;
 
-  // ---- Populate featured tile from top-rated ----
-  function populateFeatured(movie) {
-    const tile = document.getElementById('featured-tile');
-    if (!tile || !movie) return;
-
-    // Leaf watermark
-    const leaf = document.getElementById('featured-leaf');
-    leaf.innerHTML = `<svg width="340" height="340" viewBox="0 0 64 64" fill="none">
-      <path fill="#ff5a1f" d="M32 8 C 28 8, 26 12, 26 16 C 22 14, 16 14, 13 18 C 10 22, 12 28, 16 30 C 12 32, 9 36, 11 40 C 13 44, 19 44, 23 42 C 22 46, 24 50, 28 50 C 30 49, 31 46, 31 43 L 31 56 L 33 56 L 33 43 C 33 46, 34 49, 36 50 C 40 50, 42 46, 41 42 C 45 44, 51 44, 53 40 C 55 36, 52 32, 48 30 C 52 28, 54 22, 51 18 C 48 14, 42 14, 38 16 C 38 12, 36 8, 32 8 Z"/>
-    </svg>`;
-
-    const dayName = today.toLocaleDateString('en-US', { weekday: 'long' });
-    document.getElementById('featured-label').textContent = `Tonight's Pick · ${dayName}`;
-
-    const titleParts = movie.title.split(':');
-    document.getElementById('featured-title').innerHTML = titleParts[0] +
-      (titleParts.length > 1 ? `<em>: ${titleParts.slice(1).join(':').trim()}</em>` : '');
-
-    const ct = movie.content_type || 'movie';
-    const genres = (movie.genres || '').split(', ').filter(Boolean).slice(0, 3).join(' · ');
-    document.getElementById('featured-meta').innerHTML = `
-      <span>${movie.year || ''}</span><span>·</span>
-      <span>${genres}</span><span>·</span>
-      <span class="star">★ ${movie.rating}</span>
-    `;
-
-    const overview = movie.overview || '';
-    document.getElementById('featured-quote').textContent =
-      overview.length > 140 ? overview.substring(0, 140) + '…' : overview;
-
-    document.getElementById('featured-idx').innerHTML = `<em>01</em> / 06`;
-
-    tile.style.display = '';
-    tile.dataset.movieId = movie.id;
-    tile.dataset.ct = ct;
-
-    tile.addEventListener('click', () => openDetail(movie.id, ct));
-    document.getElementById('featured-btn').addEventListener('click', (e) => {
-      e.stopPropagation();
-      openDetail(movie.id, ct);
-    });
-  }
-
   // ---- Populate film card tiles ----
   function populateFilmTile(tileId, movie, idx, label) {
     const tile = document.getElementById(tileId);
@@ -322,20 +247,6 @@
 
       document.getElementById('dna-tile').style.display = '';
     } catch {}
-  }
-
-  // ---- Populate Ticker from top-rated ----
-  function populateTicker(movies) {
-    if (!movies || movies.length === 0) return;
-    const items = movies.slice(0, 6);
-    const labels = ['JUST ADDED', 'TRENDING', 'HIDDEN GEM', 'NEW THIS WEEK', 'CRITICS\' PICK', 'RECOMMENDED'];
-    // Duplicate for seamless scroll
-    const html = [...items, ...items].map((m, i) => {
-      const note = labels[i % labels.length];
-      return `<span class="ticker-item"><span class="sep">→</span>${m.title} <span class="dim">${note}</span></span>`;
-    }).join('');
-    document.getElementById('ticker-content').innerHTML = html;
-    document.getElementById('ticker-tile').style.display = '';
   }
 
   // ---- Twins (decorative, static data) ----
@@ -658,14 +569,11 @@
       const data = await API.get(url);
       const movies = data.movies || [];
 
-      if (movies.length > 0) populateFeatured(movies[0]);
-      if (movies.length > 1) populateFilmTile('film-tile-1', movies[1], 2, 'Trending');
-      if (movies.length > 2) populateFilmTile('film-tile-2', movies[2], 3, 'Hidden Gem');
-      if (movies.length > 3) populateFilmTile('film-tile-3', movies[3], 4, 'For you');
-      if (movies.length > 4) populateFilmTile('film-tile-4', movies[4], 5, 'Recommended');
-      if (movies.length > 5) populateFilmTile('film-tile-5', movies[5], 6, 'New');
-
-      populateTicker(movies);
+      if (movies.length > 0) populateFilmTile('film-tile-1', movies[0], 1, 'Top pick');
+      if (movies.length > 1) populateFilmTile('film-tile-2', movies[1], 2, 'Trending');
+      if (movies.length > 2) populateFilmTile('film-tile-3', movies[2], 3, 'Hidden Gem');
+      if (movies.length > 3) populateFilmTile('film-tile-4', movies[3], 4, 'Recommended');
+      if (movies.length > 4) populateFilmTile('film-tile-5', movies[4], 5, 'New');
     } catch {}
 
     // Show surprise + twins for everyone (decorative / public API)

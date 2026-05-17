@@ -115,12 +115,6 @@ img     { display: block; }
 
 .brand { display: flex; align-items: center; gap: 14px; }
 
-.brand-mark {
-  width: 34px; height: 34px;
-  position: relative;
-  filter: drop-shadow(0 2px 8px rgba(255,90,31,0.4));
-}
-
 .brand-name {
   font-family: 'Instrument Serif', serif;
   font-weight: 400;

@@ -80,147 +80,6 @@
 /* Lens-target elements get smooth scale transition */
 .lens-target { transition: transform 0.08s ease-out; }
 
-/* ── Featured Tile ── */
-.featured {
-  background:
-    radial-gradient(ellipse at 85% 20%, rgba(255,90,31,0.28), transparent 55%),
-    radial-gradient(ellipse at 15% 80%, rgba(165,18,15,0.22), transparent 55%),
-    linear-gradient(135deg, #1b0e0a 0%, #0a0604 100%);
-  color: var(--ink-100);
-  border: 1px solid var(--line-bright);
-  padding: 36px;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 36px;
-  position: relative;
-  overflow: hidden;
-  box-shadow: var(--shadow-2), inset 0 1px 0 rgba(255,170,100,0.08);
-}
-
-.featured-leaf {
-  position: absolute;
-  right: -60px; top: -60px;
-  width: 340px; height: 340px;
-  opacity: 0.08;
-  pointer-events: none;
-  animation: drift 22s ease-in-out infinite;
-}
-
-.featured-label {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 10px;
-  color: var(--leaf-amber);
-  letter-spacing: 0.16em; text-transform: uppercase;
-  display: flex; align-items: center; gap: 10px;
-}
-.featured-label::before {
-  content: ''; width: 24px; height: 1px;
-  background: linear-gradient(90deg, var(--leaf-flame), transparent);
-}
-
-.featured-title {
-  font-family: 'Fraunces', serif;
-  font-weight: 400;
-  font-variation-settings: "opsz" 144, "SOFT" 100;
-  font-size: 76px;
-  line-height: 0.92;
-  letter-spacing: -0.025em;
-  margin-top: 28px;
-}
-.featured-title em {
-  font-style: italic;
-  background: var(--grad-maple-v);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-.featured-meta {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 10px;
-  color: var(--ink-60);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  margin-top: 18px;
-  display: flex; gap: 14px; flex-wrap: wrap;
-}
-.featured-meta .star { color: var(--leaf-amber); }
-
-.featured-right {
-  display: flex; flex-direction: column;
-  justify-content: space-between;
-  padding: 4px 0;
-}
-
-.featured-quote {
-  font-family: 'Instrument Serif', serif;
-  font-style: italic;
-  font-size: 24px;
-  line-height: 1.32;
-  color: var(--ink-80);
-  max-width: 420px;
-  letter-spacing: -0.005em;
-}
-.featured-quote::before {
-  content: '\201C';
-  font-size: 62px;
-  color: var(--leaf-flame);
-  line-height: 0;
-  position: relative; top: 18px;
-  margin-right: 4px;
-}
-
-.featured-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  margin-top: 28px;
-}
-
-.featured-btn {
-  font-family: 'Space Grotesk', sans-serif;
-  font-weight: 600;
-  font-size: 11px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  background: transparent;
-  color: var(--ink-100);
-  border: none;
-  padding: 0;
-  display: flex; align-items: center; gap: 14px;
-  cursor: none;
-}
-.arrow-circle {
-  width: 48px; height: 48px;
-  border: 1px solid var(--line-bright);
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  transition: all 0.3s;
-  position: relative;
-  overflow: hidden;
-  background: var(--bg-2);
-}
-.arrow-circle::before {
-  content: ''; position: absolute; inset: 2px;
-  border-radius: 50%;
-  background: var(--grad-maple);
-  transform: scale(0);
-  transition: transform 0.4s cubic-bezier(.34,1.56,.64,1);
-}
-.featured-btn:hover .arrow-circle::before { transform: scale(1); }
-.arrow-circle svg { position: relative; z-index: 1; }
-
-.featured-idx {
-  font-family: 'Instrument Serif', serif;
-  font-style: italic;
-  font-size: 18px;
-  color: var(--ink-60);
-}
-.featured-idx em {
-  color: var(--leaf-amber);
-  font-style: italic;
-}
-
 /* ── Search Tile ── */
 .search-tile {
   background: linear-gradient(145deg, #1b0e0a 0%, #2a1008 50%, #1b0e0a 100%);
@@ -646,62 +505,6 @@
   font-size: 9px;
   color: var(--ink-60);
   letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
-/* ── Ticker ── */
-.ticker-tile {
-  background:
-    linear-gradient(90deg, var(--bg-1) 0%, rgba(26,9,6,0.5) 100%),
-    var(--grad-maple);
-  color: var(--ink-100);
-  padding: 0 !important;
-  display: flex; align-items: center;
-  overflow: hidden;
-  border: 1px solid var(--line-bright);
-  box-shadow: var(--shadow-2), inset 0 1px 0 rgba(255,170,100,0.15);
-}
-.ticker-tile::after { display: none; }
-.ticker-label {
-  padding: 0 28px;
-  font-family: 'Space Grotesk', sans-serif;
-  font-weight: 700;
-  font-size: 11px;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--leaf-amber);
-  border-right: 1px solid var(--line-bright);
-  align-self: stretch;
-  display: flex; align-items: center;
-  flex-shrink: 0;
-  background: var(--bg-1);
-}
-.ticker-strip { flex: 1; overflow: hidden; position: relative; }
-.ticker-content {
-  display: flex; gap: 56px;
-  white-space: nowrap;
-  animation: tickerScroll 40s linear infinite;
-  padding-left: 24px;
-}
-.ticker-item {
-  font-family: 'Instrument Serif', serif;
-  font-style: italic;
-  font-size: 22px;
-  color: var(--ink-100);
-}
-.ticker-item .sep {
-  display: inline-block;
-  margin-right: 14px;
-  color: var(--leaf-flame);
-  font-style: normal;
-}
-.ticker-item .dim {
-  color: var(--ink-60);
-  font-family: 'IBM Plex Mono', monospace;
-  font-style: normal;
-  font-size: 11px;
-  margin-left: 10px;
-  letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 
@@ -1166,6 +969,24 @@
 
 @media (max-width: 900px) { .movies-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 560px) { .movies-grid { grid-template-columns: 1fr; } }
+
+/* ── Big-tile variant: used on the "Recommended For You" grid on profile page ── */
+.movies-grid.big {
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px;
+}
+.movies-grid.big .movie-card {
+  padding: 16px;
+  gap: 18px;
+}
+.movies-grid.big .card-thumb {
+  width: 120px;
+  height: 180px;
+  border-radius: 10px;
+}
+.movies-grid.big .movie-card-title { font-size: 22px; }
+.movies-grid.big .movie-card-meta span { font-size: 11px; }
+@media (max-width: 700px) { .movies-grid.big { grid-template-columns: 1fr; } }
 
 /* ── List items (profile / watchlist) ── */
 .list-item {
