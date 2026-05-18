@@ -254,14 +254,66 @@ function renderGrid(movies, container = document.getElementById('movies-grid')) 
   if (!container) return;
   container.innerHTML = '';
   if (!movies || movies.length === 0) {
-    container.innerHTML = '<p style="color:var(--ink-60);grid-column:1/-1;padding:2rem 0;">No results found.</p>';
+    container.innerHTML = '<p style="color:var(--ink-60);grid-column:1/-1;padding:2rem 0;">Nothing here yet.</p>';
     return;
   }
   const sorted = [...movies].sort((a, b) => b.rating - a.rating);
   const cards  = sorted.map(m => makeCard(m));
   cards.forEach(card => container.appendChild(card));
+  setSquareRows(container);
+  applyBentoLayout(cards);
   setupBubbleEffect(container);
+  _bentoGrids.set(container, cards);
 }
+
+// ---- Bento layout: 6-col grid, 2x2 big + 1x1 small tiles, all poster-shaped (2:3) ----
+function _bentoColCount() {
+  const w = window.innerWidth;
+  if (w <= 560) return 2;
+  if (w <= 900) return 4;
+  return 6;
+}
+
+// Set grid-auto-rows so 1x1 cells have 2:3 portrait aspect (row height = col width × 1.5).
+function setSquareRows(container) {
+  const cols  = _bentoColCount();
+  const gapPx = parseFloat(getComputedStyle(container).columnGap) || 12;
+  const w     = container.clientWidth;
+  if (w === 0) { requestAnimationFrame(() => setSquareRows(container)); return; }
+  const cellW = Math.floor((w - gapPx * (cols - 1)) / cols);
+  container.style.gridAutoRows = Math.round(cellW * 1.5) + 'px';
+}
+
+// 6-col bento: 6-card block (2 big 2x2 + 4 small 1x1), 3 rotating patterns
+// so big tiles walk left → right → center across rows.
+function applyBentoLayout(cards) {
+  const cols   = _bentoColCount();
+  if (cols !== 6) {
+    cards.forEach(c => { c.style.gridColumn = ''; c.style.gridRow = ''; });
+    return;
+  }
+  cards.forEach((card, i) => {
+    const block  = Math.floor(i / 6);
+    const offset = i % 6;
+    const rb     = block * 2 + 1;
+    const pat    = block % 3;
+    const L = {
+      0: [[1,3,rb,rb+2],[5,7,rb,rb+2],[3,4,rb,rb+1],[4,5,rb,rb+1],[3,4,rb+1,rb+2],[4,5,rb+1,rb+2]],
+      1: [[1,3,rb,rb+2],[3,5,rb,rb+2],[5,6,rb,rb+1],[6,7,rb,rb+1],[5,6,rb+1,rb+2],[6,7,rb+1,rb+2]],
+      2: [[3,5,rb,rb+2],[5,7,rb,rb+2],[1,2,rb,rb+1],[2,3,rb,rb+1],[1,2,rb+1,rb+2],[2,3,rb+1,rb+2]],
+    }[pat][offset];
+    card.style.gridColumn = `${L[0]}/${L[1]}`;
+    card.style.gridRow    = `${L[2]}/${L[3]}`;
+  });
+}
+
+const _bentoGrids = new Map();
+window.addEventListener('resize', () => {
+  _bentoGrids.forEach((cards, container) => {
+    setSquareRows(container);
+    applyBentoLayout(cards);
+  });
+});
 
 function renderRow(container, movies) {
   if (!container) return;

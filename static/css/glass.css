@@ -957,35 +957,18 @@
 
 .movies-row .movie-card {
   flex-shrink: 0;
-  width: 160px;
+  width: 140px;
+  aspect-ratio: 2/3;
 }
 
-/* ── Movies grid: poster-shaped masonry bento ──
-   CSS multi-column flow → each card keeps its poster's natural aspect
-   ratio, and neighbouring tiles re-pack as poster heights vary. */
+/* ── Bento grid: 6-col CSS grid, 2:3 portrait cells, mixed 2x2 + 1x1 tiles ── */
 .movies-grid {
-  column-count: 4;
-  column-gap: 12px;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 12px;
 }
-.movies-grid > .movie-card {
-  break-inside: avoid;
-  display: inline-block;
-  width: 100%;
-  margin: 0 0 12px;
-}
-
-@media (max-width: 1100px) { .movies-grid { column-count: 3; } }
-@media (max-width: 760px)  { .movies-grid { column-count: 2; } }
-@media (max-width: 480px)  { .movies-grid { column-count: 1; } }
-
-/* ── Big-tile variant for "Recommended For You" ── */
-.movies-grid.big {
-  column-count: 3;
-  column-gap: 16px;
-}
-.movies-grid.big > .movie-card { margin-bottom: 16px; }
-@media (max-width: 900px) { .movies-grid.big { column-count: 2; } }
-@media (max-width: 560px) { .movies-grid.big { column-count: 1; } }
+@media (max-width: 900px) { .movies-grid { grid-template-columns: repeat(4, 1fr); } }
+@media (max-width: 560px) { .movies-grid { grid-template-columns: repeat(2, 1fr); } }
 
 /* ── List items (profile / watchlist) ── */
 .list-item {
@@ -1095,7 +1078,8 @@
 .card-poster {
   display: block;
   width: 100%;
-  height: auto;
+  height: 100%;
+  object-fit: cover;
 }
 .movie-card-overlay {
   position: absolute;

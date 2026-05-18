@@ -15,9 +15,7 @@
 
     <div style="margin-bottom:3rem;">
       <h2 class="section-title">Favorites</h2>
-      <div id="favs-list">
-        <div class="spinner"></div>
-      </div>
+      <div class="movies-grid" id="favs-list"></div>
       <p id="favs-empty" class="hidden" style="color:var(--ink-60);padding:1rem 0;">
         No favorites yet. Browse movies and add some!
       </p>
@@ -25,9 +23,7 @@
 
     <div style="margin-bottom:3rem;">
       <h2 class="section-title">Watched</h2>
-      <div id="watched-list">
-        <div class="spinner"></div>
-      </div>
+      <div class="movies-grid" id="watched-list"></div>
       <p id="watched-empty" class="hidden" style="color:var(--ink-60);padding:1rem 0;">
         No watched movies yet.
       </p>
@@ -35,9 +31,7 @@
 
     <div style="margin-bottom:3rem;">
       <h2 class="section-title">Watchlist</h2>
-      <div id="watchlist-list">
-        <div class="spinner"></div>
-      </div>
+      <div class="movies-grid" id="watchlist-list"></div>
       <p id="watchlist-empty" class="hidden" style="color:var(--ink-60);padding:1rem 0;">
         No items in your watchlist yet.
       </p>
@@ -45,9 +39,7 @@
 
     <div style="margin-bottom:3rem;" id="rec-section">
       <h2 class="section-title">Recommended For You</h2>
-      <div class="movies-grid big" id="rec-row">
-        <div class="spinner"></div>
-      </div>
+      <div class="movies-grid" id="rec-row"></div>
     </div>
   </div>
 </div>
@@ -101,7 +93,7 @@
       document.getElementById('favs-empty').classList.remove('hidden');
     } else {
       const movies = await fetchDetails(favEntries);
-      renderListView(movies, document.getElementById('favs-list'));
+      renderGrid(movies, document.getElementById('favs-list'));
     }
 
     // Watched
@@ -111,7 +103,7 @@
       document.getElementById('watched-empty').classList.remove('hidden');
     } else {
       const movies = await fetchDetails(watchEntries);
-      renderListView(movies, document.getElementById('watched-list'));
+      renderGrid(movies, document.getElementById('watched-list'));
     }
 
     // Watchlist
@@ -121,7 +113,7 @@
       document.getElementById('watchlist-empty').classList.remove('hidden');
     } else {
       const movies = await fetchDetails(wlEntries);
-      renderListView(movies, document.getElementById('watchlist-list'));
+      renderGrid(movies, document.getElementById('watchlist-list'));
     }
 
     // Personalized recommendations
