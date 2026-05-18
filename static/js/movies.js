@@ -52,10 +52,8 @@ function makeCard(movie) {
   card.dataset.id = movie.id;
   card.dataset.ct  = ct;
   card.innerHTML = `
-    <div class="card-thumb">
-      <img src="${poster}" alt="${safeTitle}" loading="lazy" onerror="this.src='/static/assets/placeholder.png'">
-    </div>
-    <div class="card-info">
+    <img class="card-poster" src="${poster}" alt="${safeTitle}" loading="lazy" onerror="this.src='/static/assets/placeholder.png'">
+    <div class="movie-card-overlay">
       <div class="movie-card-title">${safeTitle}</div>
       <div class="movie-card-meta">
         ${movie.year ? `<span>${movie.year}</span>` : ''}

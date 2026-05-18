@@ -957,36 +957,35 @@
 
 .movies-row .movie-card {
   flex-shrink: 0;
-  width: 280px;
+  width: 160px;
 }
 
-/* ── Movies grid (for browse / search results) ── */
+/* ── Movies grid: poster-shaped masonry bento ──
+   CSS multi-column flow → each card keeps its poster's natural aspect
+   ratio, and neighbouring tiles re-pack as poster heights vary. */
 .movies-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
+  column-count: 4;
+  column-gap: 12px;
+}
+.movies-grid > .movie-card {
+  break-inside: avoid;
+  display: inline-block;
+  width: 100%;
+  margin: 0 0 12px;
 }
 
-@media (max-width: 900px) { .movies-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 560px) { .movies-grid { grid-template-columns: 1fr; } }
+@media (max-width: 1100px) { .movies-grid { column-count: 3; } }
+@media (max-width: 760px)  { .movies-grid { column-count: 2; } }
+@media (max-width: 480px)  { .movies-grid { column-count: 1; } }
 
-/* ── Big-tile variant: used on the "Recommended For You" grid on profile page ── */
+/* ── Big-tile variant for "Recommended For You" ── */
 .movies-grid.big {
-  grid-template-columns: repeat(2, 1fr);
-  gap: 18px;
+  column-count: 3;
+  column-gap: 16px;
 }
-.movies-grid.big .movie-card {
-  padding: 16px;
-  gap: 18px;
-}
-.movies-grid.big .card-thumb {
-  width: 120px;
-  height: 180px;
-  border-radius: 10px;
-}
-.movies-grid.big .movie-card-title { font-size: 22px; }
-.movies-grid.big .movie-card-meta span { font-size: 11px; }
-@media (max-width: 700px) { .movies-grid.big { grid-template-columns: 1fr; } }
+.movies-grid.big > .movie-card { margin-bottom: 16px; }
+@media (max-width: 900px) { .movies-grid.big { column-count: 2; } }
+@media (max-width: 560px) { .movies-grid.big { column-count: 1; } }
 
 /* ── List items (profile / watchlist) ── */
 .list-item {
@@ -1078,46 +1077,38 @@
   color: var(--leaf-ember);
 }
 
-/* ── Movie card (compact horizontal: thumb + info) ── */
+/* ── Movie card (poster fills tile, info overlays bottom) ── */
 .movie-card {
-  display: flex;
-  gap: 12px;
-  padding: 10px;
+  position: relative;
   background: var(--bg-2);
   border: 1px solid var(--line);
   border-radius: 12px;
+  overflow: hidden;
   cursor: none;
   transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
 }
 .movie-card:hover {
-  transform: translateY(-2px);
+  transform: translateY(-3px);
   border-color: var(--line-bright);
-  box-shadow: var(--shadow-1);
+  box-shadow: var(--shadow-2);
 }
-.card-thumb {
-  flex-shrink: 0;
-  width: 60px;
-  height: 90px;
-  border-radius: 6px;
-  overflow: hidden;
-  background: var(--bg-3);
-}
-.card-thumb img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+.card-poster {
   display: block;
+  width: 100%;
+  height: auto;
 }
-.card-info {
-  flex: 1;
-  min-width: 0;
+.movie-card-overlay {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  padding: 10px 12px 12px;
+  background: linear-gradient(to top, rgba(10,6,4,0.92) 0%, rgba(10,6,4,0.65) 60%, transparent 100%);
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 .movie-card-title {
   font-family: 'Instrument Serif', serif;
-  font-size: 16px;
+  font-size: 15px;
   color: var(--ink-100);
   line-height: 1.2;
   display: -webkit-box;
@@ -1139,7 +1130,7 @@
 .movie-card-actions {
   display: flex;
   gap: 4px;
-  margin-top: auto;
+  margin-top: 6px;
 }
 .icon-btn {
   width: 28px; height: 28px;
