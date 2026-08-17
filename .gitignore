@@ -7,3 +7,4 @@ database/
 .env
 venv/
 .DS_Store
+.claude/

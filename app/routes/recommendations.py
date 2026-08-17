@@ -40,12 +40,14 @@ _TIER_CUTOFFS = [
 _HALF_LIFE = 30   # days
 _LAMBDA    = math.log(2) / _HALF_LIFE
 
+# 'not_interested' is deliberately absent: those items are hard-excluded from
+# both the seed set and the results (see collapse() and the callers below), so
+# a negative weight here would never be read.
 BASE_WEIGHT = {
-    'liked':          3.0,
-    'favorite':       2.0,
-    'watchlist':      1.5,
-    'watched':        1.0,
-    'not_interested': -4.0,   # strong negative signal
+    'liked':     3.0,
+    'favorite':  2.0,
+    'watchlist': 1.5,
+    'watched':   1.0,
 }
 
 
@@ -71,7 +73,7 @@ def _build_interest_profile(user_id):
         movie_ids, tv_ids          — collapsed seed ID lists (positive signals only)
         movie_weights, tv_weights  — parallel float weight arrays
         all_movie_ids, all_tv_ids  — all IDs across every list (for exclusion)
-        ni_movie_ids, ni_tv_ids    — "not interested" IDs (hard exclusion + negative signal)
+        ni_movie_ids, ni_tv_ids    — "not interested" IDs (hard exclusion)
     """
     now = utcnow()
 
@@ -144,6 +146,11 @@ def _build_interest_profile(user_id):
 def similar(item_id):
     engine = current_app.rec_engine
     content_type = request.args.get('type', 'movie')
+    if content_type not in ('movie', 'tv'):
+        return jsonify({'error': "content_type must be 'movie' or 'tv'"}), 400
+    # Match /api/movies/<id>: an unknown id is a 404, not an empty result set.
+    if not engine.get_item(item_id, content_type):
+        return jsonify({'error': 'Not found'}), 404
     movies = engine.get_similar(item_id, content_type=content_type, n=12)
     return jsonify({'movies': movies})
 
