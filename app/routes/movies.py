@@ -1,11 +1,14 @@
 from flask import Blueprint, request, jsonify, current_app
+from app.utils import parse_int
 
 movies_bp = Blueprint('movies', __name__)
 
 @movies_bp.route('/', methods=['GET'])
 def get_movies():
     engine = current_app.rec_engine
-    page = int(request.args.get('page', 1))
+    # A non-numeric or out-of-range page falls back to page 1 rather than
+    # raising; page < 1 would otherwise slice the catalog from the tail.
+    page = parse_int(request.args.get('page'), default=1, minimum=1)
     genre = request.args.get('genre') or None
     content_type = request.args.get('type') or None  # 'movie', 'tv', or None (all)
     return jsonify(engine.get_all(page=page, per_page=24, genre=genre, content_type=content_type))

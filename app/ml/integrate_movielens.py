@@ -137,7 +137,6 @@ def update_ratings(movies_df, tmdb_to_ml):
     agg = ratings.groupby('movieId')['rating'].agg(['mean', 'count']).reset_index()
     agg.columns = ['movieId', 'ml_rating', 'ml_count']
 
-    ml_to_tmdb_local = {v: k for k, v in tmdb_to_ml.items() if v in our_ml_ids}
     agg['tmdb_id'] = agg['movieId'].map({ml: tmdb for tmdb, ml in tmdb_to_ml.items()})
     agg = agg.dropna(subset=['tmdb_id'])
     agg['tmdb_id'] = agg['tmdb_id'].astype(int)

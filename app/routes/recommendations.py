@@ -13,7 +13,8 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import db
 from app.models.user_movie import UserMovie
 from app.models.user_interaction import UserInteraction
-from datetime import datetime, timedelta
+from app.utils import parse_item_id, utcnow
+from datetime import timedelta
 import math
 
 rec_bp = Blueprint('rec', __name__)
@@ -72,7 +73,7 @@ def _build_interest_profile(user_id):
         all_movie_ids, all_tv_ids  — all IDs across every list (for exclusion)
         ni_movie_ids, ni_tv_ids    — "not interested" IDs (hard exclusion + negative signal)
     """
-    now = datetime.utcnow()
+    now = utcnow()
 
     # --- Explicit list items ---
     user_movies = UserMovie.query.filter_by(user_id=user_id).all()
@@ -200,17 +201,19 @@ def surprise():
 def log_interaction():
     """Log an implicit user interaction (detail view, search click, etc.)."""
     user_id = int(get_jwt_identity())
-    data    = request.get_json()
-    movie_id     = data.get('movie_id')
+    data    = request.get_json(silent=True) or {}
+    movie_id     = parse_item_id(data.get('movie_id'))
     content_type = data.get('content_type', 'movie')
     action       = data.get('action', 'view')
 
-    if not movie_id:
-        return jsonify({'error': 'movie_id required'}), 400
+    if movie_id is None:
+        return jsonify({'error': 'a valid movie_id is required'}), 400
+    if content_type not in ('movie', 'tv'):
+        return jsonify({'error': "content_type must be 'movie' or 'tv'"}), 400
 
     ix = UserInteraction(
         user_id=user_id,
-        movie_id=int(movie_id),
+        movie_id=movie_id,
         content_type=content_type,
         action=action,
     )

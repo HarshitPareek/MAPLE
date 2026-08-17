@@ -1,5 +1,5 @@
 from app import db
-from datetime import datetime
+from app.utils import utcnow
 
 class UserMovie(db.Model):
     __tablename__ = 'user_movies'
@@ -8,7 +8,7 @@ class UserMovie(db.Model):
     movie_id = db.Column(db.Integer, nullable=False)
     list_type = db.Column(db.String(20), nullable=False)      # 'favorite' or 'watched'
     content_type = db.Column(db.String(10), default='movie')  # 'movie' or 'tv'
-    added_at = db.Column(db.DateTime, default=datetime.utcnow)
+    added_at = db.Column(db.DateTime, default=utcnow)
     __table_args__ = (
         db.UniqueConstraint('user_id', 'movie_id', 'list_type', 'content_type', name='unique_user_item_list'),
     )

@@ -1,5 +1,5 @@
 from app import db
-from datetime import datetime
+from app.utils import utcnow
 
 class UserInteraction(db.Model):
     __tablename__ = 'user_interactions'
@@ -8,4 +8,4 @@ class UserInteraction(db.Model):
     movie_id = db.Column(db.Integer, nullable=False)
     content_type = db.Column(db.String(10), default='movie')
     action = db.Column(db.String(20), nullable=False)  # 'view', 'detail_open', 'search_click'
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    timestamp = db.Column(db.DateTime, default=utcnow)

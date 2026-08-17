@@ -2,7 +2,10 @@ from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import db
 from app.models.user_movie import UserMovie
+from app.utils import parse_item_id
 from sqlalchemy.exc import IntegrityError
+
+VALID_CONTENT_TYPES = ('movie', 'tv')
 
 lists_bp = Blueprint('lists', __name__)
 
@@ -16,12 +19,14 @@ def _get_list(list_type):
 
 def _add(list_type):
     user_id = int(get_jwt_identity())
-    data = request.get_json()
-    movie_id = data.get('movie_id')
+    data = request.get_json(silent=True) or {}
+    movie_id = parse_item_id(data.get('movie_id'))
     content_type = data.get('content_type', 'movie')
-    if not movie_id:
-        return jsonify({'error': 'movie_id required'}), 400
-    entry = UserMovie(user_id=user_id, movie_id=int(movie_id), list_type=list_type, content_type=content_type)
+    if movie_id is None:
+        return jsonify({'error': 'a valid movie_id is required'}), 400
+    if content_type not in VALID_CONTENT_TYPES:
+        return jsonify({'error': "content_type must be 'movie' or 'tv'"}), 400
+    entry = UserMovie(user_id=user_id, movie_id=movie_id, list_type=list_type, content_type=content_type)
     db.session.add(entry)
     try:
         db.session.commit()
